@@ -23,3 +23,6 @@ missing-features = []
 
 [targets.composed]
 missing-features = []
+
+[targets.deltic-deno]
+missing-features = []

@@ -63,6 +63,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.9.5"
       # Explicit restore/save instead of setup-node's `cache: pnpm`:
       # setup-node restores on the exact lockfile hash only; the
       # restore-keys prefix reuses the previous store and refetches only

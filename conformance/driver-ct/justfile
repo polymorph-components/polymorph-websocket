@@ -17,7 +17,7 @@ results := root / "conformance/driver-ct/results"
 default: all
 
 # Build + lockfile gate + run every leg + aggregate + matrix gate.
-all: build lock-check run-wasmtime run-jco-node run-jco-browser run-composed aggregate matrix-check
+all: build lock-check run-wasmtime run-jco-node run-jco-browser run-composed run-deltic aggregate matrix-check
 
 # ----- builders ---------------------------------------------------------------
 
@@ -143,6 +143,39 @@ run-composed: compose-suite build-driver build-echod
 run-jco-browser: _jco-prepared
     {{timeout_cmd}} pnpm --dir {{root}}/conformance/driver-ct/jco run run:browser
 
+# The deltic-native leg: runtime-linked under stock Deno, no transpile
+# step. fetch-translator.ts owns the release-asset pin (TAG +
+# TRANSLATOR_SHA256, cross-checked against both deno.json import maps);
+# run.ts owns the suite run. Scoped permissions throughout, EXCEPT
+# --allow-run: Deno refuses a *scoped* --allow-run outright whenever
+# dynamic-linker vars (LD_LIBRARY_PATH etc.) sit in the ambient
+# environment — they could redirect the allowed binary, and no
+# --allow-env grant lifts the refusal (verified on Deno 2.9.5). Ambient
+# LD_LIBRARY_PATH is common on dev machines and run.ts is in-repo
+# trusted code, so --allow-run stays unscoped; the spawn target is
+# still just the echod binary. DENO_CERT provisions trust for the
+# suite's committed test PKI, the Deno analogue of run-jco-node's
+# NODE_EXTRA_CA_CERTS.
+run-deltic: build-suite build-echod
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shim=$(deno run \
+        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
+        --allow-read={{root}} \
+        --allow-write={{root}}/target/deltic \
+        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
+        {{root}}/conformance/driver-ct/deltic/fetch-translator.ts)
+    mkdir -p {{results}}
+    DENO_CERT={{root}}/conformance/server/tls/ca.pem {{timeout_cmd}} deno run \
+        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
+        --allow-read={{root}} \
+        --allow-write={{results}} \
+        --allow-net=127.0.0.1,localhost \
+        --allow-run \
+        --allow-env=DENO_CERT \
+        {{root}}/conformance/driver-ct/deltic/run.ts \
+        --translator "$shim" --out {{results}}/deltic-deno.jsonl --target deltic-deno
+
 # ----- aggregation -------------------------------------------------------------
 
 aggregate: _ct-tools
@@ -153,6 +186,7 @@ aggregate: _ct-tools
         --results composed={{results}}/composed.jsonl \
         --results jco-node={{results}}/jco-node.jsonl \
         --results jco-browser={{results}}/jco-browser.jsonl \
+        --results deltic-deno={{results}}/deltic-deno.jsonl \
         -o {{results}}/matrix.md
 
 # The committed matrix is the cross-target review surface; regenerate

@@ -46,10 +46,11 @@ in-guest.
 | --- | --- |
 | [`wit/`](wit) | The `polymorph:websocket` package: a `types` interface for structural types and a `connections` interface owning the `websocket` resource. One copy at the root; consumers pull it in via `wit/deps` symlinks. Package-wide contracts live in [`wit/README.md`](wit/README.md). |
 | [`js/jco`](js/jco) | The **browser-first host library** (`websocket.js`): the standard `WebSocket` API only, no `node:` modules, no runtime dependencies. Shared verbatim by the demo runners and the conformance jco legs. |
+| [`js/deltic`](js/deltic) | The **deltic-native host module** (`websocket.ts`): the same logic as `js/jco/websocket.js`, ported to [deltic](https://github.com/lann/deltic)'s embedder conventions (typed streams, `WitError`) for its runtime-linked, no-transpile conformance leg. |
 | [`rust/wasmtime`](rust/wasmtime) | The **Wasmtime host crate** (`wasmtime-websocket`): `add_to_linker` + `WasiWebsocketView`, per-store `WasiWebsocketCtx` knobs for the bounds the WIT leaves implementation-defined. |
 | [`js/componentize`](js/componentize) | The **browser-API shim** for componentize-js guests: the WHATWG `WebSocket` interface implemented over the WIT imports — the inverse of `js/jco` — plus the **WPT parity gate**: vendored web-platform-tests run round-trip (shim → WIT → jco → platform WebSocket) and held to the platform baseline's pass set. |
 | [`rust/guest-provider`](rust/guest-provider) | The **in-guest provider** (`websocket-guest-provider`): a WebSocket client stack over `wasi:sockets` TCP, exporting the package surface as a composable component; `wss:` via the composed [`polymorph:tls`](https://github.com/polymorph-components/polymorph-tls) component. See its README for the TLS posture and configuration channel. |
-| [`conformance/`](conformance) | The **cross-implementation conformance suite** on the [`polymorph:test`](https://github.com/polymorph-components/polymorph-test) harness: a shared guest suite (`guest-ct`, its committed `tests.lock` the corpus inventory), a suite-owned echo server with fault-injection modes, and the driver (`driver-ct`) that runs every target (wasmtime, jco under Node, jco under headless Chromium) into [the matrix](conformance/README.md). |
+| [`conformance/`](conformance) | The **cross-implementation conformance suite** on the [`polymorph:test`](https://github.com/polymorph-components/polymorph-test) harness: a shared guest suite (`guest-ct`, its committed `tests.lock` the corpus inventory), a suite-owned echo server with fault-injection modes, and the driver (`driver-ct`) that runs every target (wasmtime, jco under Node, jco under headless Chromium, composed, and deltic under stock Deno) into [the matrix](conformance/README.md). |
 | [`examples/`](examples) | The **echo-demo guest component** plus native (`just demo::wasmtime`) and Node (`just demo::node`) runners against the suite echo server. |
 
 ## The interface
@@ -96,7 +97,7 @@ trees).
 ```sh
 ./scripts/setup.sh
 just check           # fmt + clippy + WIT validation + native tests
-just conformance-ct  # the full matrix: wasmtime, composed, jco-node, jco-browser
+just conformance-ct  # the full matrix: wasmtime, composed, jco-node, jco-browser, deltic-deno
 just demo::wasmtime  # the echo demo on the native host
 just demo::node      # the same component under Node + jco
 just ci              # exactly what CI runs

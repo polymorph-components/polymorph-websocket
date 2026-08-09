@@ -31,6 +31,18 @@ Layout (each directory's justfile module in parentheses):
 - `js/jco/` — `websocket.js`, the browser-first host module. Its knobs are
   exported functions (`setMaxInboundBufferBytes`, `setConnectTimeoutMs`,
   `setCloseTimeoutMs`); the module reads no ambient configuration.
+- `js/deltic/` (`just deltic-module-check`) — `websocket.ts`, the same
+  logic ported to [deltic](https://github.com/lann/deltic)'s embedder
+  conventions (typed streams, `WitError`) for its runtime-linked,
+  no-transpile conformance leg (`conformance/driver-ct/deltic/`). The
+  deltic release is pinned in `conformance/driver-ct/deltic/fetch-translator.ts`
+  (TAG + translator-shim sha256) and in TWO import maps —
+  `js/deltic/deno.json` and `conformance/driver-ct/deltic/deno.json` —
+  which must agree byte-for-byte on the `@deltic/runtime/embedder` URL
+  (deltic's `wasi-shims` imports it by bare specifier internally, so a
+  drift would load the embedder module twice and break `instanceof
+  WitError` across the boundary). Bump procedure:
+  `conformance/driver-ct/deltic/README.md`.
 - `js/componentize/` (`just wpt::…`) — `websocket.js`, the WHATWG-API
   shim for componentize-js guests (deviations registry in its header), and
   the WPT parity gate (`wpt/README.md` is the vendoring policy; losses
@@ -38,7 +50,8 @@ Layout (each directory's justfile module in parentheses):
 - `conformance/` (`just conformance-ct`) — the conformance suite on the
   `polymorph:test` harness: `guest-ct/` (the suite component; the
   committed `tests.lock` is the corpus inventory),
-  `driver-ct/` (wasmtime + jco-node + jco-browser + composed legs, `targets.toml`
+  `driver-ct/` (wasmtime + jco-node + jco-browser + composed + deltic-deno
+  legs, `targets.toml`
   with the expected-fail mechanism, the committed `matrix.md`), and
   `server/` (echod; `server/PROTOCOL.md` is its wire contract,
   `server/echod.mjs` the shared Node spawn helpers). The suite crates
