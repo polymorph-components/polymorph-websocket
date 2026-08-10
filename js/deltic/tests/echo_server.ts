@@ -15,7 +15,7 @@ export interface TestServer {
 }
 
 /** The payload `/burst` sends for message `index` (echod's rule). */
-export function burstPayload(index: number, size: number): Uint8Array {
+export function burstPayload(index: number, size: number): Uint8Array<ArrayBuffer> {
   const out = new Uint8Array(size);
   for (let i = 0; i < size; i++) out[i] = (index + i) % 256;
   return out;

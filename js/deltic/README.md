@@ -40,7 +40,11 @@ import maps byte-identical for that one entry.
 `deno task test` runs the module's unit tests against a local Deno echo server
 (`tests/echo_server.ts`, a small subset of the real conformance echod's
 protocol). `deno task check` type-checks `websocket.ts` and `tests/`
-against the pinned release URLs.
+against the pinned release URLs, under the `dom` libs (`deno.json`'s
+`compilerOptions.lib`): that is the browser consumer's configuration, and
+its `WebSocket.send` signature is stricter than Deno's own declarations.
+The Deno-default-lib configuration is covered by the conformance driver's
+`check` task, which imports this module.
 
 ```sh
 cd js/deltic
