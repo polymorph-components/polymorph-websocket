@@ -17,7 +17,7 @@ results := root / "conformance/driver-ct/results"
 default: all
 
 # Build + lockfile gate + run every leg + aggregate + matrix gate.
-all: build lock-check run-wasmtime run-jco-node run-jco-browser run-composed run-deltic run-deltic-browser aggregate matrix-check
+all: build lock-check run-wasmtime run-composed run-deltic run-deltic-browser aggregate matrix-check
 
 # ----- builders ---------------------------------------------------------------
 
@@ -35,7 +35,9 @@ build-driver:
 # URL (URLs change on renames): the sdk's [[package]] block in
 # Cargo.lock carries the git source to install from. The pins gate then
 # asserts one rev everywhere — a skewed bump runs the JS harness
-# against a Rust runner from a different rev.
+# against a Rust runner from a different rev. The deltic browser driver's
+# lockfile is the only JS pin site left: the WPT parity tree stopped
+# consuming the runner core when its jco carrier retired.
 _ct-tools:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -48,9 +50,7 @@ _ct-tools:
         printf '%s' "$rev" > target/ct-tools/.rev
     fi
     target/ct-tools/bin/component-test pins --cargo-lock Cargo.lock \
-        --js-lock conformance/driver-ct/jco/pnpm-lock.yaml \
         --js-lock conformance/driver-ct/deltic/pnpm-lock.yaml \
-        --js-lock js/componentize/wpt/parity/pnpm-lock.yaml \
         --expect "$rev" > /dev/null
 
 build-echod:
@@ -102,13 +102,7 @@ compose-suite: build-suite build-provider build-tls-component
         {{suite_wasm}} \
         -o {{root}}/target/wasm32-wasip2/release/composed/conformance_guest_ct.wasm
 
-# pnpm install + transpile (the echo/text-unicode case guards the
-# transpiler's string lowering).
-_jco-prepared: build-suite build-echod
-    pnpm --dir {{root}}/conformance/driver-ct/jco install --silent
-    pnpm --dir {{root}}/conformance/driver-ct/jco run transpile
-
-build: build-suite build-driver build-echod _ct-tools _jco-prepared
+build: build-suite build-driver build-echod _ct-tools
 
 # ----- lockfile ---------------------------------------------------------------
 
@@ -130,19 +124,11 @@ run-wasmtime: build-suite build-driver
     {{timeout_cmd}} {{root}}/target/debug/ct-driver {{suite_wasm}} \
         --jsonl --jobs 4 --target wasmtime > {{results}}/wasmtime.jsonl
 
-run-jco-node: _jco-prepared
-    # NODE_EXTRA_CA_CERTS provisions trust for the suite's committed test
-    # PKI; Node reads it at process startup, so it rides the recipe.
-    NODE_EXTRA_CA_CERTS={{root}}/conformance/server/tls/ca.pem {{timeout_cmd}} pnpm --dir {{root}}/conformance/driver-ct/jco run run:node
-
 run-composed: compose-suite build-driver build-echod
     {{timeout_cmd}} {{root}}/target/debug/ct-driver \
         {{root}}/target/wasm32-wasip2/release/composed/conformance_guest_ct.wasm \
         --composed --suite-artifact {{suite_wasm}} \
         --jsonl --jobs 4 --target composed > {{results}}/composed.jsonl
-
-run-jco-browser: _jco-prepared
-    {{timeout_cmd}} pnpm --dir {{root}}/conformance/driver-ct/jco run run:browser
 
 # The deltic-native leg: runtime-linked under stock Deno, no transpile
 # step. fetch-translator.ts owns the release-asset pin (TAG +
@@ -155,8 +141,8 @@ run-jco-browser: _jco-prepared
 # LD_LIBRARY_PATH is common on dev machines and run.ts is in-repo
 # trusted code, so --allow-run stays unscoped; the spawn target is
 # still just the echod binary. DENO_CERT provisions trust for the
-# suite's committed test PKI, the Deno analogue of run-jco-node's
-# NODE_EXTRA_CA_CERTS.
+# suite's committed test PKI, the Deno analogue of the NODE_EXTRA_CA_CERTS
+# the retired jco Node leg carried (see git history).
 run-deltic: build-suite build-echod
     #!/usr/bin/env bash
     set -euo pipefail
@@ -213,8 +199,6 @@ aggregate: _ct-tools
         --manifest {{root}}/conformance/driver-ct/targets.toml \
         --results wasmtime={{results}}/wasmtime.jsonl \
         --results composed={{results}}/composed.jsonl \
-        --results jco-node={{results}}/jco-node.jsonl \
-        --results jco-browser={{results}}/jco-browser.jsonl \
         --results deltic-deno={{results}}/deltic-deno.jsonl \
         --results deltic-browser={{results}}/deltic-browser.jsonl \
         -o {{results}}/matrix.md

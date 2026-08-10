@@ -9,8 +9,9 @@
 #     bootstrap script)
 #   - pnpm (via npm, version pinned below)
 #   - JS dependencies for the package trees (skipped with SKIP_NODE=1);
-#     the jco toolchain arrives as a prebuilt release-asset tarball
-#     (@bytecodealliance/jco-transpile), so installs run no cargo build
+#     the JS package trees carry no compiled toolchain (deltic arrives as
+#     pinned release assets, componentize-js as a verified binary), so
+#     installs run no cargo build
 #
 # Prerequisites it does NOT install: rustup itself, Node 24+ and npm.
 #
@@ -130,7 +131,7 @@ if [ "${SKIP_NODE:-}" != "1" ]; then
     if ! have pnpm; then
         npm install -g "pnpm@${PNPM_VERSION}"
     fi
-    for dir in conformance/driver-ct/jco examples/jco-demo js/componentize/wpt/parity; do
+    for dir in conformance/driver-ct/deltic js/componentize/wpt/parity; do
         if [ -f "$REPO_ROOT/$dir/package.json" ]; then
             (cd "$REPO_ROOT/$dir" && pnpm install)
         fi

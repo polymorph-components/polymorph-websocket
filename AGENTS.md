@@ -28,13 +28,14 @@ Layout (each directory's justfile module in parentheses):
 - `rust/wasmtime/` — the `wasmtime-websocket` host crate. Its knobs (the
   connect/close bounds, the inbound-buffer bound) live on
   `WasiWebsocketCtx`; the crate reads no ambient environment.
-- `js/jco/` — `websocket.js`, the browser-first host module. Its knobs are
-  exported functions (`setMaxInboundBufferBytes`, `setConnectTimeoutMs`,
-  `setCloseTimeoutMs`); the module reads no ambient configuration.
-- `js/deltic/` (`just deltic-module-check`) — `websocket.ts`, the same
-  logic ported to [deltic](https://github.com/lann/deltic)'s embedder
-  conventions (typed streams, `WitError`) for its runtime-linked,
-  no-transpile conformance leg (`conformance/driver-ct/deltic/`). The
+- `js/deltic/` (`just deltic-module-check`) — `websocket.ts`, THE
+  browser-first JS host module, over
+  [deltic](https://github.com/lann/deltic)'s embedder conventions (typed
+  streams, `WitError`) for its runtime-linked, no-transpile legs
+  (`conformance/driver-ct/deltic/`, the WPT parity round trip, the demo).
+  Its knobs are exported functions (`configure`,
+  `setMaxInboundBufferBytes`, `setConnectTimeoutMs`, `setCloseTimeoutMs`);
+  the module reads no ambient configuration. The
   deltic release is pinned in `conformance/driver-ct/deltic/fetch-translator.ts`
   (TAG + translator-shim sha256) and in TWO import maps —
   `js/deltic/deno.json` and `conformance/driver-ct/deltic/deno.json` —
@@ -50,27 +51,21 @@ Layout (each directory's justfile module in parentheses):
 - `conformance/` (`just conformance-ct`) — the conformance suite on the
   `polymorph:test` harness: `guest-ct/` (the suite component; the
   committed `tests.lock` is the corpus inventory),
-  `driver-ct/` (wasmtime + jco-node + jco-browser + composed + deltic-deno
-  legs, `targets.toml`
+  `driver-ct/` (wasmtime + composed + deltic-deno + deltic-browser legs,
+  `targets.toml`
   with the expected-fail mechanism, the committed `matrix.md`), and
   `server/` (echod; `server/PROTOCOL.md` is its wire contract,
   `server/echod.mjs` the shared Node spawn helpers). The suite crates
   consume the harness as rev-pinned git dependencies (the two
   `[workspace.dependencies]` entries in the root `Cargo.toml`), the
-  jco legs consume its JS runner core as a git dep
-  (`@polymorph/component-test-js` in `driver-ct/jco/package.json`), and the
-  `component-test` CLI is cargo-installed at the rev Cargo.lock
+  deltic-browser driver consumes its JS runner core as a git dep
+  (`@polymorph/component-test-js` in `driver-ct/deltic/package.json`), and
+  the `component-test` CLI is cargo-installed at the rev Cargo.lock
   records (`conformance-ct::_ct-tools`). One rev everywhere; the root
-  `Cargo.toml` comment is the bump checklist. The jco toolchain is a
-  prebuilt tarball dependency: the three JS package trees (pnpm) consume
-  `@bytecodealliance/jco-transpile` as an https release asset on the
-  `lann/jco` fork, packed from a pinned rev (`pnpm pack` in
-  `packages/jco-transpile` at that rev; prepack runs cargo + tsc).
-  pnpm's git-subpath (`#path:`) dependencies are off the table: pnpm
-  stores the unbuilt repository root under the dependency's store key,
-  which poisons every install after the first. Bumping jco means
-  packing at the new rev, uploading a new release asset on `lann/jco`,
-  updating each package.json spec, then reinstalling.
+  `Cargo.toml` comment is the bump checklist. There is no transpiler
+  dependency anywhere: the JS host legs are runtime-linked by the pinned
+  deltic release assets (single pin site:
+  `driver-ct/deltic/{deno.json,deno.lock,fetch-translator.ts}`).
 - `examples/` (`just demo::…`) — the echo-demo guest and its host runners.
 
 Checks to run before committing, by what changed: WIT or `wit/README.md` →
@@ -93,11 +88,13 @@ places listed failing at run time. The sites:
   `examples/wasmtime-demo/src/lib.rs`;
 - `wit_bindgen::generate!` in the suite (`conformance/guest-ct/src/lib.rs`)
   and its import paths in `guest-ct/src/body.rs`;
-- jco import bindings (fail at run time, not build):
-  `conformance/driver-ct/jco/harness.mjs` (`bindImports`),
-  `examples/jco-demo/run.mjs`;
-- the jco host module's exported class names, which jco maps by resource
-  name: `js/jco/websocket.js`.
+- the deltic imports records, keyed by verbatim versioned WIT id and
+  failing at run time rather than build time: `js/deltic/websocket.ts`
+  (`CONNECTIONS_INTERFACE`, `websocketImports`), the parity carrier
+  (`js/componentize/wpt/parity/deltic-carrier.ts`), and the exported
+  export ids in `examples/deltic-demo/run.ts`;
+- the deltic host module's exported resource-class names, which the
+  embedder maps by resource name: `js/deltic/websocket.ts`.
 
 Before designing WIT or touching async/stream plumbing, consult
 [`lann/wasm-component-starter`](https://github.com/lann/wasm-component-starter)
@@ -113,10 +110,11 @@ decision to record, not a refactor.
   defined exactly once, at the root `wit/`. Components pull it in through
   `wit/deps` **symlinks** back to the root. Do not copy the package into a
   component or replace those symlinks with real directories.
-- **The jco host must stay browser-compatible.** The browser host library
-  uses only the standard `WebSocket` API — no `node:` modules, no Node-only
-  APIs: the same file must be loadable in a browser unchanged. Node is just
-  the current runner (24+ for JSPI).
+- **The JS host must stay browser-compatible.** `js/deltic/websocket.ts`
+  uses only the standard `WebSocket` API — no `node:` modules, no
+  Deno-only APIs: the same file must load in a browser unchanged (the
+  deltic-browser conformance row and the Chromium parity leg both depend
+  on it).
 - **The browser API bounds the portable surface.** Capabilities the browser
   `WebSocket` cannot serve (headers, client certs, ping/pong, trust
   decisions) do not appear on the ungated surface. Divergence between

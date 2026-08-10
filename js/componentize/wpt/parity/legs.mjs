@@ -7,10 +7,12 @@
 // Environment-neutral by construction: no Node imports, and every module
 // reference is resolved against this module's own URL, so the same file
 // works from `file:` (Node) and `http:` (a browser page). Module identity
-// matters for the round trip: this module and the generated tree must
-// reach the *same* reporter.js instance for `setSink` to observe the
-// runner's records, which URL-relative resolution from the repository
-// layout guarantees.
+// matters for the round trip: `setSink` must reach the SAME reporter
+// instance the component's `wpt:parity/reporter` import is wired to.
+// Since the carrier is a bundle, its reporter copy is distinct from this
+// repository's `../reporter.js` module — so the round-trip leg takes
+// BOTH `setSink` and the runner from the carrier and never imports
+// `../reporter.js` itself (see deltic-carrier.ts's header).
 
 /**
  * The baseline leg: run the vendored WPT suites directly against this
@@ -39,24 +41,35 @@ export async function runBaseline(wsBase) {
 
 /**
  * The round-trip leg: the same suites through the full carrier stack —
- * shim, WIT, component ABI, jco, websocket-jco — terminating in the same
- * platform `WebSocket` the baseline measured, against the same echo
- * server. `generated` names the jco transpile tree to load, relative to
- * this module: "generated" (the Node profile) or "generated-web" (the
- * browser profile). Collects the records the runner streams through its
+ * shim, WIT, component ABI, deltic, js/deltic/websocket.ts — terminating
+ * in the same platform `WebSocket` the baseline measured, against the
+ * same echo server. Collects the records the runner streams through its
  * `wpt:parity/reporter` import and cross-checks the count `run` resolves
  * to; a record lost between the runner and the sink fails the leg.
+ *
+ * `carrier` is supplied by the engine driver, which owns byte loading:
+ * `url` is the bundled carrier module (build/deltic-carrier.mjs),
+ * `translatorPath`/`componentPath` name the two wasm artifacts as
+ * repository-relative paths, and `loadBytes` reads one (Node: fs;
+ * browser: fetch against the static server).
+ *
  * @param {string} wsBase
- * @param {string} generated
+ * @param {{ url: string, translatorPath: string, componentPath: string,
+ *          loadBytes: (path: string) => Promise<Uint8Array> }} carrier
  * @returns {Promise<{ group: string, name: string, status: string, message?: string }[]>}
  */
-export async function runRoundtrip(wsBase, generated) {
-  const [{ setSink }, { runner }] = await Promise.all([
-    import(new URL("../reporter.js", import.meta.url).href),
-    import(new URL(`./${generated}/parity-runner.js`, import.meta.url).href),
+export async function runRoundtrip(wsBase, carrier) {
+  const { setSink, instantiateRunner } = await import(carrier.url);
+  const [translatorBytes, componentBytes] = await Promise.all([
+    carrier.loadBytes(carrier.translatorPath),
+    carrier.loadBytes(carrier.componentPath),
   ]);
+  const runner = await instantiateRunner(translatorBytes, componentBytes);
   const records = [];
   setSink((record) => records.push(JSON.parse(record)));
+  // The export's `result<string, string>` lifts to return-or-throw in
+  // return position (contracts/embedder-api.md §"Value mapping"), the
+  // same shape the jco-era carrier presented here.
   const output = await runner.run(wsBase);
   const MARKER = "WPT-PARITY-STREAMED ";
   if (typeof output !== "string" || !output.startsWith(MARKER)) {

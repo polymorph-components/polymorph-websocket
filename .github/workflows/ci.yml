@@ -55,7 +55,7 @@ jobs:
         with:
           tools: component-test-cli
           js-locks: |
-            conformance/driver-ct/jco/pnpm-lock.yaml
+            conformance/driver-ct/deltic/pnpm-lock.yaml
             js/componentize/wpt/parity/pnpm-lock.yaml
       - uses: pnpm/action-setup@v4
         with:
@@ -79,7 +79,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/jco/pnpm-lock.yaml', 'examples/jco-demo/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
+          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/deltic/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
           restore-keys: pnpm-store-v2-${{ runner.os }}-
       - name: Install dependencies
         run: ./scripts/setup.sh
@@ -89,7 +89,7 @@ jobs:
       # conformance run on main should not force the next run to rebuild.
       # PR branches restore but never save, so they don't evict main's
       # caches under the repository cap. `pnpm store prune` drops entries
-      # no longer referenced by the three package trees, so the saved
+      # no longer referenced by the two package trees, so the saved
       # store does not grow across dependency and pin bumps.
       - name: Prune and save pnpm store
         if: github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true'
@@ -98,7 +98,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/jco/pnpm-lock.yaml', 'examples/jco-demo/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
+          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/deltic/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
       # The WPT parity Chromium leg always runs Playwright's own build,
       # pinned by playwright-core's version in the parity lockfile, so
       # losses-chromium.js measures one engine everywhere. The cache key
@@ -123,8 +123,8 @@ jobs:
             npx playwright-core install --with-deps chromium
           fi
       - run: just gha::conformance-checks
-        # The jco-browser adapter finds the runner's preinstalled Chrome via
-        # its candidate paths; CHROME_PATH overrides if ever needed.
+        # The deltic-browser adapter finds the runner's preinstalled Chrome
+        # via its candidate paths; CHROME_PATH overrides if ever needed.
 
       # Presentation, not verdict: the just recipe above already gated
       # the same aggregate; this re-runs it through component-test's
@@ -141,8 +141,6 @@ jobs:
           results: |
             wasmtime=conformance/driver-ct/results/wasmtime.jsonl
             composed=conformance/driver-ct/results/composed.jsonl
-            jco-node=conformance/driver-ct/results/jco-node.jsonl
-            jco-browser=conformance/driver-ct/results/jco-browser.jsonl
             deltic-deno=conformance/driver-ct/results/deltic-deno.jsonl
             deltic-browser=conformance/driver-ct/results/deltic-browser.jsonl
           summary-title: Conformance matrix

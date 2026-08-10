@@ -1,16 +1,20 @@
 # `js/deltic` — the deltic-native `polymorph:websocket` host module
 
-`websocket.ts` is the [deltic](https://github.com/lann/deltic)-native port
-of [`js/jco/websocket.js`](../jco/websocket.js): the same behavioral
-reference host, rewritten over deltic's embedder API (typed `Stream<T>` /
-`ReadableStream` rather than bare-payload `Stream`, and `WitError` throws
-rather than `throw { tag, val }`). It was developed as deltic's own
+`websocket.ts` is **the** JS host for `polymorph:websocket`: the standard
+`WebSocket` API only, no `node:` modules, no runtime dependencies, and it
+carries every JS-host row of the conformance matrix (Deno and headless
+Chromium). It began as the [deltic](https://github.com/lann/deltic)-native
+port of the browser-first reference host `js/jco/websocket.js` (retired
+with the jco legs at commit c9252be; see git history), rewritten over
+deltic's embedder API (typed `Stream<T>` / `ReadableStream` rather than
+bare-payload `Stream`, and `WitError` throws rather than
+`throw { tag, val }`). It was developed as deltic's own
 `ports/websocket` reference-host port and is upstreamed here per
 [lann/deltic#14](https://github.com/lann/deltic/issues/14); the WIT
 contract is [`wit/websocket.wit`](../../wit/websocket.wit), and every doc
 comment quoting a contract quotes that file.
 
-## Behavioral delta vs. `websocket.js`
+## Behavioral delta vs. the retired `websocket.js`
 
 Exactly one, and it is a **runtime** difference, not a design choice:
 
