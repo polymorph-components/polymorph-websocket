@@ -26,3 +26,9 @@ missing-features = []
 
 [targets.deltic-deno]
 missing-features = []
+
+# The same suite runtime-linked inside headless Chromium against the
+# deltic host module (js/deltic/websocket.ts over the browser's native
+# WebSocket): one deno-bundled worker, no transpile step.
+[targets.deltic-browser]
+missing-features = []
