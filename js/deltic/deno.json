@@ -6,6 +6,9 @@
   "imports": {
     "@deltic/runtime/embedder": "https://raw.githubusercontent.com/lann/deltic/pre-58b2404/runtime/src/embedder/mod.ts"
   },
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
+  },
   "tasks": {
     "check": "deno check websocket.ts tests",
     "test": "deno test --allow-net=127.0.0.1,localhost tests"

@@ -457,7 +457,10 @@ export class Websocket {
       await new Promise((resolve) => setTimeout(resolve, DRAIN_POLL_MS));
     }
     try {
-      this.#ws.send(message.val as string | Uint8Array);
+      // `<ArrayBuffer>` (the dom-lib `send` signature excludes SAB-backed
+      // views): a guest-lifted `list<u8>` is always a fresh copy
+      // (contracts/embedder-api.md §"Value mapping"), never SAB-backed.
+      this.#ws.send(message.val as string | Uint8Array<ArrayBuffer>);
     } catch (err) {
       throw witError({ tag: "other", val: String((err as Error)?.message ?? err) });
     }
