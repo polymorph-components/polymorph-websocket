@@ -17,7 +17,7 @@ results := root / "conformance/driver-ct/results"
 default: all
 
 # Build + lockfile gate + run every leg + aggregate + matrix gate.
-all: build lock-check run-wasmtime run-jco-node run-jco-browser run-composed run-deltic aggregate matrix-check
+all: build lock-check run-wasmtime run-jco-node run-jco-browser run-composed run-deltic run-deltic-browser aggregate matrix-check
 
 # ----- builders ---------------------------------------------------------------
 
@@ -49,6 +49,7 @@ _ct-tools:
     fi
     target/ct-tools/bin/component-test pins --cargo-lock Cargo.lock \
         --js-lock conformance/driver-ct/jco/pnpm-lock.yaml \
+        --js-lock conformance/driver-ct/deltic/pnpm-lock.yaml \
         --js-lock js/componentize/wpt/parity/pnpm-lock.yaml \
         --expect "$rev" > /dev/null
 
@@ -176,6 +177,34 @@ run-deltic: build-suite build-echod
         {{root}}/conformance/driver-ct/deltic/run.ts \
         --translator "$shim" --out {{results}}/deltic-deno.jsonl --target deltic-deno
 
+# The deltic browser driver's npm tree (the upstream page driver +
+# worker message loop + playwright-core; no transpiler).
+_deltic-browser-prepared:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd {{root}}/conformance/driver-ct/deltic
+    if [ pnpm-lock.yaml -nt node_modules/.modules.yaml ]; then
+        pnpm install --silent
+    fi
+
+# The suite runtime-linked inside headless Chromium against the deltic
+# host module: the worker is one deno-bundled module (engine + host
+# module + message loop; browser/worker-entry.ts), so no transpile step
+# and no generated tree.
+run-deltic-browser: build-suite build-echod _deltic-browser-prepared
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd {{root}}/conformance/driver-ct/deltic
+    deno run --config deno.json --frozen \
+        --allow-read={{root}} --allow-write={{root}}/target/deltic \
+        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
+        fetch-translator.ts >/dev/null
+    mkdir -p {{root}}/target/deltic-browser
+    deno bundle --config deno.json --platform browser \
+        -o {{root}}/target/deltic-browser/websocket-worker.mjs browser/worker-entry.ts
+    mkdir -p {{results}}
+    {{timeout_cmd}} node run-browser.mjs
+
 # ----- aggregation -------------------------------------------------------------
 
 aggregate: _ct-tools
@@ -187,6 +216,7 @@ aggregate: _ct-tools
         --results jco-node={{results}}/jco-node.jsonl \
         --results jco-browser={{results}}/jco-browser.jsonl \
         --results deltic-deno={{results}}/deltic-deno.jsonl \
+        --results deltic-browser={{results}}/deltic-browser.jsonl \
         -o {{results}}/matrix.md
 
 # The committed matrix is the cross-target review surface; regenerate
