@@ -56,7 +56,6 @@ jobs:
           tools: component-test-cli
           js-locks: |
             conformance/driver-ct/deltic/pnpm-lock.yaml
-            js/componentize/wpt/parity/pnpm-lock.yaml
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.5
