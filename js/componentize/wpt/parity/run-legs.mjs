@@ -29,7 +29,7 @@ function leg(name, argv) {
 await mkdir(join(HERE, "build"), { recursive: true });
 const baseline = await leg("baseline", ["baseline.mjs"]);
 await writeFile(join(HERE, "build", "parity-baseline.json"), baseline);
-const roundtrip = await leg("roundtrip", ["--experimental-wasm-jspi", "roundtrip.mjs"]);
+const roundtrip = await leg("roundtrip", ["roundtrip.mjs"]);
 await writeFile(join(HERE, "build", "parity-roundtrip.json"), roundtrip);
 
 const compareArgs = ["compare.mjs", "build/parity-baseline.json", "build/parity-roundtrip.json"];

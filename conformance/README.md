@@ -27,7 +27,7 @@ section.
 | --- | --- |
 | [`guest-ct/`](guest-ct) | The suite component: `#[case]`s importing `polymorph:websocket/connections`, owning **every assertion**. One wasm binary, run unchanged against every target. The committed `tests.lock` is its inventory (drift fails `lock-check` and the runner's own cross-check). |
 | [`server/`](server) | The suite-owned echo/reference server (`conformance-echod`): echo plus the fault modes the close-semantics rows need. Wire contract in [`server/PROTOCOL.md`](server/PROTOCOL.md); `server/echod.mjs` holds the Node-side spawn helpers every JS leg shares. |
-| [`driver-ct/`](driver-ct) | The legs and the aggregate. `ct-driver` (Rust) embeds the wasmtime host (and, with `--composed`, runs the wac-composed in-guest provider under WASI p2+p3 instead); `jco/` runs the transpiled suite in Node and headless Chromium through one shared `harness.mjs` — thin glue (SUT import wiring, config) over the upstream runner core (`@polymorph/component-test-js`, the git dep), which owns the case loop, verdict mapping, and tag-inventory drift check. `targets.toml` declares targets, features, and expected-fail entries; `component-test aggregate` validates and renders the matrix. The composed leg executes a different artifact by construction (the suite with the provider plugged in), so it binds its results envelope to the uncomposed suite's bytes (`--suite-artifact`, the runner's `bind_suite_artifact` attestation) and the aggregate's cross-target artifact agreement covers all four legs. |
+| [`driver-ct/`](driver-ct) | The legs and the aggregate. `ct-driver` (Rust) embeds the wasmtime host (and, with `--composed`, runs the wac-composed in-guest provider under WASI p2+p3 instead); `deltic/` runs the same suite **runtime-linked** — no transpile step, no generated tree, no engine flag — under stock Deno (`run.ts`) and inside headless Chromium (`run-browser.mjs` plus the bundled `browser/worker-entry.ts` worker), thin glue (SUT import wiring, config) over the upstream runner core (`@deltic/ct-runner` and `@polymorph/component-test-js`'s page driver), which owns the case loop, verdict mapping, and tag-inventory drift check. `targets.toml` declares targets, features, and expected-fail entries; `component-test aggregate` validates and renders the matrix. The composed leg executes a different artifact by construction (the suite with the provider plugged in), so it binds its results envelope to the uncomposed suite's bytes (`--suite-artifact`, the runner's `bind_suite_artifact` attestation) and the aggregate's cross-target artifact agreement covers all four legs. |
 | [`wit/`](wit) | The suite's world (`sut-imports`): only the surface under test — the export surface comes from the component-test SDK. The `polymorph:websocket` package arrives through the `deps/polymorph-websocket` symlink, never a copy. |
 
 ### The result stream
@@ -44,20 +44,22 @@ aggregate do not change.
 ### Timing and buffer bounds
 
 Every leg configures the implementation under test with the same bounds
-(declared in `driver-ct/src/main.rs`, mirrored by the jco runners): an
+(declared in `driver-ct/src/main.rs`, mirrored by the deltic runners): an
 inbound-buffer bound small enough that the overflow rows trigger with a
 bounded flood (it rides the `WS_CONFORMANCE_MAX_INBOUND_BUFFER_BYTES`
 store environment, so the guest floods against exactly the configured
 value), and connect/close bounds short enough that the `/stall` and
 `/ignore-close` probes resolve well inside the per-case wall bound. That
-bound (60s, the runner's `--case-timeout`; mirrored in `harness.mjs`)
+bound (60s, the runner's `--case-timeout`; mirrored by the deltic
+runners' `CASE_TIMEOUT_MS`)
 runs a single attempt, **no retries**: a nondeterministic failure is a
 real signal and must surface, not be masked by a second attempt. Message
 counts and sizes are the guest's own (`params` in `guest-ct/src/body.rs`):
 every target runs the identical workload by construction.
 
 Browser-specific scheduling: Chromium serializes in-flight WebSocket
-handshakes per endpoint. The jco legs run cases sequentially, so nothing
+handshakes per endpoint. The browser leg runs cases sequentially (one
+worker), so nothing
 is ever concurrent with the `/stall` hold; if a concurrent scheduler is
 ever introduced, it needs an equivalent of the old harness's
 handshake-blocking workaround.
@@ -104,8 +106,8 @@ records the resolution). The `component-test` CLI used by the lockfile
 and aggregate recipes is cargo-installed into `target/ct-tools` at the
 rev read back out of Cargo.lock (`conformance-ct::_ct-tools`), so the
 libraries and the CLI cannot drift apart. Registry dependencies replace
-the git pins when component-test publishes. The jco legs consume the
-JS runner core the same way: `@polymorph/component-test-js` in
-`driver-ct/jco/package.json`, a `github:polymorph-components/polymorph-test#<rev>` git
+the git pins when component-test publishes. The deltic-browser driver
+consumes the JS runner core the same way:
+`@polymorph/component-test-js` in `driver-ct/deltic/package.json`, a `github:polymorph-components/polymorph-test#<rev>` git
 dep pinned to the same rev as the cargo entries (one rev everywhere —
 the root `Cargo.toml` comment is the bump checklist).

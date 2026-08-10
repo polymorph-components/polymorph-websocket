@@ -7,8 +7,12 @@ WebSocket suites run twice against the same suite echo server:
   `WebSocket` (Node's built-in) — no shim, no WIT, no wasm;
 - **round trip** (`parity/roundtrip.mjs`): through the full carrier stack —
   `js/componentize/websocket.js` (the shim), the `polymorph:websocket` WIT
-  surface, the component ABI, jco's transpile, and `js/jco/websocket.js` —
-  terminating in the same platform WebSocket.
+  surface, the component ABI, deltic's runtime linking, and
+  `js/deltic/websocket.ts` — terminating in the same platform WebSocket.
+  The carrier is one deno-bundled module (`parity/deltic-carrier.ts` →
+  `parity/build/deltic-carrier.mjs`): no transpile step, no generated
+  tree, no engine flag. componentize-js — the *guest* toolchain that
+  builds the runner component — is unchanged.
 
 The comparator (`parity/compare.mjs`) holds the round trip to the
 baseline's pass set: every baseline pass the round trip loses must be
@@ -22,12 +26,13 @@ without an exclusion list. `just wpt::parity` runs the gate;
 
 The leg bodies are engine-neutral (`parity/legs.mjs`); an engine driver
 supplies only the environment. `just wpt::parity-chromium` runs both legs
-inside a headless Chromium (137+ for JSPI): the baseline measures
-Chromium's own `WebSocket`, and the round trip runs the browser-profile
-transpile (`pnpm run transpile:web` — wasi mapped to the preview2-shim
-browser build, `wasi:sockets` to `parity/sockets-stub.mjs`), served from a
-static mirror of the repository layout so every relative import resolves
-unbundled. Each engine ratchets separately (`parity/losses-chromium.js`,
+inside a headless Chromium: the baseline measures Chromium's own
+`WebSocket`, and the round trip loads the same carrier bundle (deltic's
+wasi shims, plus `parity/sockets-stub-deltic.mjs` for the
+`wasi:sockets` imports the componentize-js runtime declares but the runner
+never uses), served from a static mirror of the repository layout so every
+relative import — and the two wasm artifacts the carrier fetches —
+resolves unbundled. Each engine ratchets separately (`parity/losses-chromium.js`,
 re-recorded with `just wpt::update-losses-chromium`): a loss set is a fact
 about one engine's baseline.
 

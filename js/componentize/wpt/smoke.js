@@ -1,7 +1,8 @@
 // A pipeline smoke entry: proves the componentize-js toolchain, the shim,
-// and the jco round-trip host stack end to end before (and beside) the
+// and the deltic round-trip host stack end to end before (and beside) the
 // full WPT runner. Componentized against the same `wpt-parity-runner`
-// world; the round-trip leg's transpile serves the same imports.
+// world, so the round-trip leg's carrier (parity/deltic-carrier.ts)
+// serves it the same imports.
 import { report } from "wpt:parity/reporter@0.1.0";
 import { WebSocket } from "./js/componentize/websocket.js";
 

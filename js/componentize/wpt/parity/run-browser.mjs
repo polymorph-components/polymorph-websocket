@@ -1,24 +1,27 @@
 // The browser parity legs: the same two legs as run-legs.mjs — the shared
 // bodies in legs.mjs — run inside a real, headless Chromium, so the
 // baseline measures Chromium's own `WebSocket` and the round trip runs
-// the browser-profile transpile (`pnpm run transpile:web`) against
-// websocket-jco in the environment it actually targets. The comparator is
-// the same compare.mjs; the ratchet is per-engine (losses-chromium.js),
-// because a loss set is a fact about one engine's baseline.
+// the deltic carrier bundle against js/deltic/websocket.ts in the
+// environment it actually targets. The comparator is the same
+// compare.mjs; the ratchet is per-engine (losses-chromium.js), because a
+// loss set is a fact about one engine's baseline.
 //
 // The static server mirrors the repository layout under an allowlist, so
 // the served modules' relative imports (legs.mjs -> ../harness.js, the
-// generated tree -> js/jco/websocket.js, the wasi maps -> the
-// preview2-shim browser build) resolve with no bundling and the same URL
-// identity legs.mjs relies on. The page opens `ws:` connections to the
-// echo server directly: WebSocket is not subject to CORS, and a localhost
-// `http:` page may open `ws:` connections.
+// vendored group modules) resolve with no bundling and the same URL
+// identity legs.mjs relies on; the carrier itself is one bundle
+// (parity/build/deltic-carrier.mjs) and the two wasm artifacts it needs —
+// the pinned deltic translator under /target/deltic/ and the parity
+// runner component — are fetched from the same server. The page opens
+// `ws:` connections to the echo server directly: WebSocket is not subject
+// to CORS, and a localhost `http:` page may open `ws:` connections.
 //
 // The browser is always Playwright's own Chromium build, pinned by
 // playwright-core's version (the parity lockfile), so losses-chromium.js
 // measures one engine everywhere — local runs and CI alike. Install it
 // once with `npx playwright-core install --with-deps chromium` (from this
-// directory). jco's async ABI needs JSPI; Chromium ships it.
+// directory). No engine flag is involved: deltic runs the runner
+// component's async exports on the callback ABI.
 //
 // Usage: node run-browser.mjs [--update]
 
@@ -35,6 +38,9 @@ import { spawnEchod } from "../../../../conformance/server/echod.mjs";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
 const update = process.argv.includes("--update");
+// Must agree with conformance/driver-ct/deltic/fetch-translator.ts's TAG
+// (the single pin site), as roundtrip.mjs does.
+const TAG = "pre-58b2404";
 
 const MIME = {
   ".js": "text/javascript",
@@ -45,10 +51,9 @@ const MIME = {
 };
 
 // The subtrees a page may read: the WPT gate's own tree (harness, groups,
-// reporter, parity modules, the generated-web transpile and its
-// node_modules maps) and the jco host module the round trip terminates
-// in.
-const SERVED_PREFIXES = ["/js/componentize/wpt/", "/js/jco/"];
+// reporter, parity modules, the carrier bundle and the runner component)
+// and the pinned deltic translator asset the carrier translates with.
+const SERVED_PREFIXES = ["/js/componentize/wpt/", "/target/deltic/"];
 
 /** Serve the repository layout, read-only, under SERVED_PREFIXES. */
 function startServer() {
@@ -90,16 +95,33 @@ function startServer() {
  * One leg, inside the browser page: import the shared leg bodies over
  * HTTP and run one of them. Serialized via `page.evaluate`.
  */
-async function runLegInPage({ base, wsBase, leg }) {
+async function runLegInPage({ base, wsBase, leg, tag }) {
   const legs = await import(`${base}/js/componentize/wpt/parity/legs.mjs`);
-  return leg === "baseline" ? legs.runBaseline(wsBase) : legs.runRoundtrip(wsBase, "generated-web");
+  if (leg === "baseline") return legs.runBaseline(wsBase);
+  const carrier = {
+    url: `${base}/js/componentize/wpt/parity/build/deltic-carrier.mjs`,
+    translatorPath: `target/deltic/${tag}/deltic-translator-shim.wasm`,
+    componentPath: "js/componentize/wpt/build/parity-runner.component.wasm",
+    async loadBytes(path) {
+      const resp = await fetch(`${base}/${path}`);
+      if (!resp.ok) throw new Error(`GET ${path}: ${resp.status}`);
+      return new Uint8Array(await resp.arrayBuffer());
+    },
+  };
+  return legs.runRoundtrip(wsBase, carrier);
 }
 
 async function main() {
-  try {
-    await access(join(HERE, "generated-web", "parity-runner.js"));
-  } catch {
-    throw new Error(`missing browser-profile transpile in ${join(HERE, "generated-web")}; run "npm run transpile:web" first`);
+  for (const [what, rel] of [
+    ["carrier bundle (run `just wpt::parity-chromium`)", "js/componentize/wpt/parity/build/deltic-carrier.mjs"],
+    ["parity runner component (run `js/componentize/wpt/component.sh build`)", "js/componentize/wpt/build/parity-runner.component.wasm"],
+    ["translator asset (run conformance/driver-ct/deltic/fetch-translator.ts)", `target/deltic/${TAG}/deltic-translator-shim.wasm`],
+  ]) {
+    try {
+      await access(join(REPO_ROOT, rel));
+    } catch {
+      throw new Error(`missing ${rel}: ${what}`);
+    }
   }
 
   const echod = await spawnEchod(join(REPO_ROOT, "target", "debug", "conformance-echod"));
@@ -122,7 +144,7 @@ async function main() {
       page.on("console", (msg) => process.stderr.write(`[browser] ${msg.text()}\n`));
       page.on("pageerror", (err) => console.error(`[browser error] ${err.stack ?? err.message}`));
       await page.goto(`${base}/`);
-      records[leg] = await page.evaluate(runLegInPage, { base, wsBase: echod.base, leg });
+      records[leg] = await page.evaluate(runLegInPage, { base, wsBase: echod.base, leg, tag: TAG });
       await page.close();
     }
   } finally {

@@ -9,9 +9,11 @@ deliberately mirroring their architecture.
 
 One guest component binary runs unchanged against:
 
-- a **browser-first** host ([`js/jco`](js/jco)): the standard `WebSocket`
-  API only, zero dependencies — the same file loads in a browser and under
-  Node (24+ for JSPI);
+- a **browser-first** JS host ([`js/deltic`](js/deltic)): the standard
+  `WebSocket` API only, zero runtime dependencies — the same file loads in
+  a browser, under Deno, and under Node, runtime-linked by
+  [deltic](https://github.com/lann/deltic) with no transpile step and no
+  engine flag;
 - a **native Rust** host ([`rust/wasmtime`](rust/wasmtime)): Wasmtime +
   [`tokio-tungstenite`], modeled after `wasmtime_wasi_http::p3`.
 
@@ -45,13 +47,12 @@ in-guest.
 | Path | Deliverable |
 | --- | --- |
 | [`wit/`](wit) | The `polymorph:websocket` package: a `types` interface for structural types and a `connections` interface owning the `websocket` resource. One copy at the root; consumers pull it in via `wit/deps` symlinks. Package-wide contracts live in [`wit/README.md`](wit/README.md). |
-| [`js/jco`](js/jco) | The **browser-first host library** (`websocket.js`): the standard `WebSocket` API only, no `node:` modules, no runtime dependencies. Shared verbatim by the demo runners and the conformance jco legs. |
-| [`js/deltic`](js/deltic) | The **deltic-native host module** (`websocket.ts`): the same logic as `js/jco/websocket.js`, ported to [deltic](https://github.com/lann/deltic)'s embedder conventions (typed streams, `WitError`) for its runtime-linked, no-transpile conformance leg. |
+| [`js/deltic`](js/deltic) | The **browser-first JS host module** (`websocket.ts`): the standard `WebSocket` API only, no `node:` modules, no runtime dependencies, over [deltic](https://github.com/lann/deltic)'s embedder conventions (typed streams, `WitError`). Shared verbatim by the demo runner, the conformance JS-host rows, and the WPT parity round trip. |
 | [`rust/wasmtime`](rust/wasmtime) | The **Wasmtime host crate** (`wasmtime-websocket`): `add_to_linker` + `WasiWebsocketView`, per-store `WasiWebsocketCtx` knobs for the bounds the WIT leaves implementation-defined. |
-| [`js/componentize`](js/componentize) | The **browser-API shim** for componentize-js guests: the WHATWG `WebSocket` interface implemented over the WIT imports — the inverse of `js/jco` — plus the **WPT parity gate**: vendored web-platform-tests run round-trip (shim → WIT → jco → platform WebSocket) and held to the platform baseline's pass set. |
+| [`js/componentize`](js/componentize) | The **browser-API shim** for componentize-js guests: the WHATWG `WebSocket` interface implemented over the WIT imports — the inverse of `js/deltic` — plus the **WPT parity gate**: vendored web-platform-tests run round-trip (shim → WIT → deltic → platform WebSocket) and held to the platform baseline's pass set. |
 | [`rust/guest-provider`](rust/guest-provider) | The **in-guest provider** (`websocket-guest-provider`): a WebSocket client stack over `wasi:sockets` TCP, exporting the package surface as a composable component; `wss:` via the composed [`polymorph:tls`](https://github.com/polymorph-components/polymorph-tls) component. See its README for the TLS posture and configuration channel. |
-| [`conformance/`](conformance) | The **cross-implementation conformance suite** on the [`polymorph:test`](https://github.com/polymorph-components/polymorph-test) harness: a shared guest suite (`guest-ct`, its committed `tests.lock` the corpus inventory), a suite-owned echo server with fault-injection modes, and the driver (`driver-ct`) that runs every target (wasmtime, jco under Node, jco under headless Chromium, composed, and deltic under stock Deno) into [the matrix](conformance/README.md). |
-| [`examples/`](examples) | The **echo-demo guest component** plus native (`just demo::wasmtime`) and Node (`just demo::node`) runners against the suite echo server. |
+| [`conformance/`](conformance) | The **cross-implementation conformance suite** on the [`polymorph:test`](https://github.com/polymorph-components/polymorph-test) harness: a shared guest suite (`guest-ct`, its committed `tests.lock` the corpus inventory), a suite-owned echo server with fault-injection modes, and the driver (`driver-ct`) that runs every target (wasmtime, composed, deltic under stock Deno, and deltic inside headless Chromium) into [the matrix](conformance/README.md). |
+| [`examples/`](examples) | The **echo-demo guest component** plus native (`just demo::wasmtime`) and JS (`just demo::deltic`) runners against the suite echo server. |
 
 ## The interface
 
@@ -88,8 +89,9 @@ channel as interchangeable message transports.
 
 ## Running it
 
-Prerequisites: `rustup`, Node 24+ (the jco runners need JSPI), a
-Chrome/Chromium 137+ for the browser conformance target (discovered from
+Prerequisites: `rustup`, Node 24+ (the Node-side drivers), Deno (the
+deltic legs; no engine flags anywhere), a Chrome/Chromium for the browser
+conformance target (discovered from
 the usual locations, or set `CHROME_PATH`), and `./scripts/setup.sh`
 (installs the pinned `wasm-tools`/`wac`/`just`/`pnpm` and the JS package
 trees).
@@ -97,9 +99,9 @@ trees).
 ```sh
 ./scripts/setup.sh
 just check           # fmt + clippy + WIT validation + native tests
-just conformance-ct  # the full matrix: wasmtime, composed, jco-node, jco-browser, deltic-deno
+just conformance-ct  # the full matrix: wasmtime, composed, deltic-deno, deltic-browser
 just demo::wasmtime  # the echo demo on the native host
-just demo::node      # the same component under Node + jco
+just demo::deltic    # the same component runtime-linked under deltic
 just ci              # exactly what CI runs
 ```
 

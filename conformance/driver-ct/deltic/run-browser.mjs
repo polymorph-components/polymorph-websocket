@@ -7,8 +7,8 @@
 // engine + host module + upstream message loop in one module — see the
 // entry's header for why one bundle is the sound shape). This file is
 // the frame: the echo server, the environment, target configuration,
-// and results writing — the browser sibling of ./run.ts exactly as
-// ../jco/run-browser.mjs is the browser sibling of ../jco/run-node.mjs.
+// and results writing — the browser sibling of ./run.ts (as the retired
+// jco run-browser.mjs was of its run-node.mjs; see git history).
 //
 // The page is served from http://127.0.0.1:<port> and opens ws:
 // connections to the echo server directly (WebSocket is CORS-exempt);

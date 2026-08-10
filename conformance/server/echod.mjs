@@ -1,7 +1,9 @@
-// Node-only helpers for everything that drives the suite echo server
-// (the conformance jco legs, the WPT parity legs, the jco demo):
+// Node-only helpers for everything that drives the suite echo server from
+// Node (the deltic-browser conformance driver, the WPT parity legs):
 // spawning the `conformance-echod` binary and deriving the unreachable
-// URL. Colocated with the server it spawns.
+// URL. Colocated with the server it spawns. The Deno-side drivers
+// (conformance/driver-ct/deltic/run.ts, examples/deltic-demo/run.ts) port
+// the same LISTENING-line contract rather than importing this module.
 import { spawn } from "node:child_process";
 import net from "node:net";
 
@@ -62,15 +64,17 @@ export function unreachableUrl() {
 }
 
 /**
- * Fail fast, with the reason, on a Node too old for the jco async ABI
- * (JSPI needs Node 24+; the package scripts supply the flag).
+ * Fail fast, with the reason, on a Node older than this repo's floor. No
+ * engine flag is involved anywhere any more — deltic's callback ABI needs
+ * none — but the Node-side drivers and their toolchain (the parity legs,
+ * the deltic-browser page driver) are only exercised on Node 24+.
  */
 export function requireNode24() {
   const major = Number(process.versions.node.split(".")[0]);
   if (major < 24) {
     console.error(
-      `Node ${process.versions.node} is too old: the jco async ABI needs JSPI ` +
-        "(Node 24+ with --experimental-wasm-jspi). See the README prerequisites.",
+      `Node ${process.versions.node} is too old: this repository's Node-side ` +
+        "drivers require Node 24+. See the README prerequisites.",
     );
     process.exit(1);
   }

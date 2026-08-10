@@ -1,9 +1,13 @@
 // The embedder half of the parity runner's `wpt:parity/reporter` import:
-// the jco transpile maps that interface to this module (see the transpile
-// scripts in parity/package.json), so whichever environment loads the
-// generated module installs its sink here before invoking `run`, and
-// receives each record as the test settles. Dependency-free and
-// browser-safe.
+// the round trip's carrier bundle (parity/deltic-carrier.ts) provides
+// this module as that interface, so whichever environment loads the
+// carrier installs its sink through the carrier's re-exported `setSink`
+// before invoking `run`, and receives each record as the test settles.
+//
+// MODULE IDENTITY: after bundling, the carrier's copy of this module is a
+// distinct instance — always take `setSink` from the carrier, never by
+// importing this file directly alongside it (see the carrier's header).
+// Dependency-free and browser-safe.
 
 let sink = null;
 

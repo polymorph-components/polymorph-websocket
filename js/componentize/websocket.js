@@ -3,13 +3,13 @@
 // componentize-js (https://github.com/lann/componentize-js, the wit-dylib
 // reboot of ComponentizeJS), backed by the `polymorph:websocket` imports.
 //
-// This is the inverse of `js/jco/websocket.js`: that module implements the
-// WIT *imports* over the standard browser API, while this one implements
-// the standard browser API *over* the WIT imports, so JS application code
-// written against `WebSocket` can be componentized and run against any
-// host that serves `polymorph:websocket/connections` — including, round-trip,
-// the jco host itself (the WPT parity gate in `wpt/` measures exactly what
-// that carrier stack loses).
+// This is the inverse of `js/deltic/websocket.ts`: that module implements
+// the WIT *imports* over the standard browser API, while this one
+// implements the standard browser API *over* the WIT imports, so JS
+// application code written against `WebSocket` can be componentized and
+// run against any host that serves `polymorph:websocket/connections` —
+// including, round-trip, that JS host itself (the WPT parity gate in
+// `wpt/` measures exactly what that carrier stack loses).
 //
 // The surface mirrors the WHATWG WebSocket interface: the constructor
 // (URL and subprotocol validation with the spec's SyntaxError semantics),

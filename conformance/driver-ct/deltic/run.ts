@@ -1,10 +1,11 @@
 // The repo's own deltic leg of the component-test conformance harness:
 // this repo's flagship gate is `just conformance-ct` running EVERY target
-// (wasmtime, jco-node, jco-browser, composed) against the shared suite;
-// this is the fifth, deltic-native target — the deltic analogue of
-// `conformance/driver-ct/jco/run-node.mjs`, mirroring it exactly:
+// (wasmtime, composed, deltic-deno, deltic-browser) against the shared
+// suite; this is the deltic-native Deno target. It began as the deltic
+// analogue of the jco Node leg (`conformance/driver-ct/jco/run-node.mjs`,
+// retired with the jco legs; see git history), mirroring it exactly:
 //
-//   run-node.mjs                              | this runner
+//   the retired run-node.mjs                  | this runner
 //   ------------------------------------------+---------------------------
 //   `connections.setMaxInboundBufferBytes(…)`  | `configure({ … })`, same values
 //   `spawnEchod(bin)` scraping LISTENING       | `spawnEchod()`, same scrape
@@ -13,8 +14,8 @@
 //   `runSuite(...)` (component-test-js)        | `runSuite(...)` (ct-runner)
 //   `NODE_EXTRA_CA_CERTS=…/tls/ca.pem`         | `DENO_CERT=…/tls/ca.pem`
 //
-// deltic is a runtime linker: unlike the jco legs there is no transpile
-// step, no generated tree, and no engine flag — the WIT contract's async
+// deltic is a runtime linker: there is no transpile step, no generated
+// tree, and no engine flag — the WIT contract's async
 // exports run on the callback ABI under stock Deno.
 //
 //   just conformance-ct::run-deltic          # the full leg
@@ -32,11 +33,10 @@
 // IDENTICAL pinned URL, or the embedder module loads twice and
 // `instanceof WitError` stops holding across the module boundary.
 //
-// The suite artifact is the BARE suite — websocket still imported. This
-// is the exact component the jco leg transpiles (jco/package.json's
-// `transpile` script names it), i.e. the pre-transpile input; the
-// sibling `composed/` artifact has the provider plugged in-guest and
-// would exercise no host module at all.
+// The suite artifact is the BARE suite — websocket still imported — so
+// the run actually exercises the host module; the sibling `composed/`
+// artifact has the provider plugged in-guest and would exercise no host
+// module at all.
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";

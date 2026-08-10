@@ -1,12 +1,16 @@
 # The WPT parity gate: the vendored web-platform-tests WebSocket suites
 # run twice — directly against the platform's own WebSocket (the baseline)
-# and through the componentized shim transpiled by jco against
-# js/jco/websocket.js (the round trip) — and the comparator holds the
+# and through the componentized shim runtime-linked by deltic against
+# js/deltic/websocket.ts (the round trip) — and the comparator holds the
 # round trip to the baseline's pass set, with known losses pinned in
 # parity/losses.js. Both legs end at the same platform WebSocket and the
 # same suite echo server, so the delta isolates exactly what the carrier
-# stack (shim, WIT shape, component ABI, jco) loses. See README.md (this
-# directory) for the vendoring policy and architecture.
+# stack (shim, WIT shape, component ABI, deltic) loses. See README.md
+# (this directory) for the vendoring policy and architecture.
+#
+# The deltic pin is single-site: the carrier bundle resolves @deltic/*
+# through conformance/driver-ct/deltic/deno.json and its translator asset
+# comes from that directory's fetch-translator.ts.
 
 import '../../../justfile.shared.just'
 
@@ -26,26 +30,26 @@ parity: _artifacts
 update-losses: _artifacts
     {{timeout_cmd}} node {{root}}/js/componentize/wpt/parity/run-legs.mjs --update
 
-# The same parity gate inside a headless Chromium (137+ for JSPI): the
-# baseline measures Chromium's own WebSocket, the round trip runs the
-# browser-profile transpile against websocket-jco in the environment it
-# targets. Ratchets separately in parity/losses-chromium.js — a loss set
-# is a fact about one engine's baseline. The browser is always
+# The same parity gate inside a headless Chromium: the baseline measures
+# Chromium's own WebSocket, the round trip runs the deltic carrier against
+# js/deltic/websocket.ts in the environment it targets. Ratchets
+# separately in parity/losses-chromium.js — a loss set is a fact about one
+# engine's baseline. The browser is always
 # Playwright's pinned Chromium build (install once with
 # `npx playwright-core install --with-deps chromium` from parity/), so
 # the loss set measures one engine everywhere.
-parity-chromium: _artifacts-web
+parity-chromium: _artifacts
     {{timeout_cmd}} node {{root}}/js/componentize/wpt/parity/run-browser.mjs
 
 # Re-record parity/losses-chromium.js from an actual Chromium run; same
 # review bar as update-losses.
-update-losses-chromium: _artifacts-web
+update-losses-chromium: _artifacts
     {{timeout_cmd}} node {{root}}/js/componentize/wpt/parity/run-browser.mjs --update
 
-# Componentize and transpile the pipeline smoke entry and run it: a fast
-# bisector for toolchain or jco bumps, asserting nothing the parity gate
-# does not, but failing in minutes rather than suites.
-smoke: build-echod
+# Componentize the pipeline smoke entry and run it under the same carrier:
+# a fast bisector for toolchain or deltic-pin bumps, asserting nothing the
+# parity gate does not, but failing in minutes rather than suites.
+smoke: build-echod _carrier
     #!/usr/bin/env bash
     set -euo pipefail
     cd '{{root}}'
@@ -55,28 +59,36 @@ smoke: build-echod
         componentize js/componentize/wpt/smoke.js -p . \
         -o js/componentize/wpt/build/smoke.component.wasm
     cd js/componentize/wpt/parity
-    pnpm run -s transpile:smoke
-    node --experimental-wasm-jspi smoke-run.mjs
+    node smoke-run.mjs
 
 # Regenerate the group modules and componentize the parity runner from the
-# working tree, then transpile it for the round-trip leg.
+# working tree, then build the carrier both legs' drivers load.
 [private]
-_artifacts: build-echod
+_artifacts: build-echod _carrier
     #!/usr/bin/env bash
     set -euo pipefail
     cd '{{root}}'
     ./js/componentize/wpt/component.sh build
-    cd js/componentize/wpt/parity
-    pnpm run -s transpile
 
-# The browser-profile transpile on top of the shared artifacts (the wasi
-# imports map to the preview2-shim browser build; see package.json).
+# The round trip's carrier: the pinned deltic translator asset, plus the
+# one bundle that carries the engine, the host module, and the reporter
+# instance the runner's import is wired to (deltic-carrier.ts's header
+# explains why one bundle is the sound shape). Both the fetch and the
+# bundle run out of conformance/driver-ct/deltic — the single deltic pin
+# site — mirroring conformance-ct::run-deltic-browser.
 [private]
-_artifacts-web: _artifacts
+_carrier:
     #!/usr/bin/env bash
     set -euo pipefail
-    cd '{{root}}/js/componentize/wpt/parity'
-    pnpm run -s transpile:web
+    cd '{{root}}/conformance/driver-ct/deltic'
+    deno run --config deno.json --frozen \
+        --allow-read={{root}} --allow-write={{root}}/target/deltic \
+        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
+        fetch-translator.ts >/dev/null
+    mkdir -p {{root}}/js/componentize/wpt/parity/build
+    deno bundle --config deno.json --frozen --platform browser \
+        -o {{root}}/js/componentize/wpt/parity/build/deltic-carrier.mjs \
+        {{root}}/js/componentize/wpt/parity/deltic-carrier.ts
 
 [private]
 build-echod:

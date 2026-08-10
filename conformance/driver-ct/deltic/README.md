@@ -4,8 +4,8 @@ The `deltic-deno` target in the conformance matrix: the suite runs
 runtime-linked under stock Deno — no transpile step, no generated tree,
 no engine flag (the WIT contract's async exports run on the callback ABI)
 — against [`js/deltic/websocket.ts`](../../../js/deltic/websocket.ts).
-This is the deltic analogue of the jco Node leg
-(`conformance/driver-ct/jco/run-node.mjs`); see `run.ts`'s header for the
+This is the deltic analogue of the retired jco Node leg (removed with the
+jco legs; see git history); see `run.ts`'s header for the
 exact mirror.
 
 ## Running it

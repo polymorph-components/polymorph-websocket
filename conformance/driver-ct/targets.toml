@@ -1,6 +1,13 @@
 # Target capability manifest for the component-test conformance harness
 # (the #48-mechanism successor to ../targets.toml).
 #
+# The wasmtime rows run under the generic component-test host runner and
+# the composed row runs the wac-composed in-guest provider; the deltic
+# rows runtime-link the same suite artifact under the release-pinned
+# deltic runtime — on stock Deno (driver-ct/deltic/run.ts) and inside
+# headless Chromium (driver-ct/deltic/run-browser.mjs), with no transpile
+# step and no engine flag.
+#
 # No [features]: every current target serves the whole polymorph:websocket
 # surface. When a capability gap appears, declare it here (`[features.x]
 # kind = "gated"` + `missing-features`), tag the affected cases, and add
@@ -13,12 +20,6 @@
 version = "0.1"
 
 [targets.wasmtime]
-missing-features = []
-
-[targets.jco-node]
-missing-features = []
-
-[targets.jco-browser]
 missing-features = []
 
 [targets.composed]

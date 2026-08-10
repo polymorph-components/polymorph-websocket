@@ -1,6 +1,6 @@
 # `js/componentize` — the browser-API shim
 
-`websocket.js` is the inverse of `js/jco/websocket.js`: where that module
+`websocket.js` is the inverse of `js/deltic/websocket.ts`: where that module
 implements the `polymorph:websocket` **imports** over the standard browser
 `WebSocket` API, this one implements the standard browser API **over the
 WIT imports**, for JS guests componentized with
@@ -28,8 +28,8 @@ documents the sourcing and the escape hatches (`COMPONENTIZE_JS`,
 ## The WPT parity gate
 
 `wpt/` runs vendored web-platform-tests WebSocket suites through this shim
-**round trip** — shim → WIT → component ABI → jco → `js/jco/websocket.js`
-→ the platform's own WebSocket — against the same suite echo server a
+**round trip** — shim → WIT → component ABI → deltic →
+`js/deltic/websocket.ts` → the platform's own WebSocket — against the same suite echo server a
 plain-Node baseline leg uses, and holds the round trip to the baseline's
 pass set. See [`wpt/README.md`](wpt/README.md).
 

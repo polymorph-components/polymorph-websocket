@@ -2,15 +2,17 @@
 // deltic embedder conventions (contracts/embedder-api.md).
 //
 // PORT PROVENANCE. This is a faithful translation of the consumer's
-// browser-first reference host,
-// `polymorph-websocket/js/jco/websocket.js` (cited below as
-// `websocket.js:LINE`), which the consumer's own conformance suite
-// asserts the behavior of. The LOGIC — timeout defaults, buffer bounds,
+// browser-first reference host, `polymorph-websocket/js/jco/websocket.js`
+// **at commit c9252be** — the file was retired with the jco legs, so the
+// `websocket.js:LINE` citations below read against that revision
+// (`git show c9252be:js/jco/websocket.js`). That reference host's
+// behavior is what this repo's conformance suite asserts, and this module
+// now carries every JS-host row of the matrix. The LOGIC — timeout defaults, buffer bounds,
 // close-code validation, subprotocol validation, overflow-close
 // behavior, the receive-via-stream single-use rule — is preserved
 // line-for-line; only the *conventions* are translated:
 //
-//   jco                                  | this port
+//   the retired jco host                 | this port
 //   -------------------------------------+------------------------------------
 //   `throw { tag, val }` (bare payload)   | `throw new WitError({ tag, val })`
 //   jco `Stream` (`read({count})`)        | `Stream<T>` / `ReadableStream`
