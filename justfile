@@ -67,6 +67,11 @@ check-js:
 test:
     cargo test
 
+# js/deltic's own unit-test gate (type-check + tests); the conformance
+# leg itself is `conformance-ct::run-deltic`.
+deltic-module-check:
+    cd js/deltic && deno task check && deno task test
+
 # The jco toolchain pin names one release-asset URL across all three JS
 # package trees' package.json dependency specs. Catches a partial bump,
 # which installs cleanly everywhere and drifts silently.
