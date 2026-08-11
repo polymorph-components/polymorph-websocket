@@ -9,16 +9,16 @@ importers:
   .:
     dependencies:
       '@polymorph/component-test-js':
-        specifier: github:polymorph-components/polymorph-test#f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6
-        version: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6
+        specifier: github:polymorph-components/polymorph-test#3ec431717895b2e4fa81500794e0da7fd13e26e7
+        version: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7
       playwright-core:
         specifier: ^1.61.1
         version: 1.62.1
 
 packages:
 
-  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6':
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6}
+  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7':
+    resolution: {gitHosted: true, integrity: sha512-Y2sc0jPnTc/UKXgB5jWth4UK+45KikzSGRsj0TeeIhKMJ27a1vrFMfC89RILVJU/5JzJ65f5SvKillJT65vtxA==, tarball: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7}
     version: 0.2.0
 
   playwright-core@1.62.1:
@@ -28,6 +28,6 @@ packages:
 
 snapshots:
 
-  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6': {}
+  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7': {}
 
   playwright-core@1.62.1: {}
