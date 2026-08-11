@@ -51,7 +51,7 @@ jobs:
         # Owns the rev derivation, the rev-keyed tools cache, the
         # install, and the pins gate; the justfile's _ct-tools
         # recognizes the stamped install and does not repeat it.
-        uses: polymorph-components/polymorph-test/actions/setup@f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6
+        uses: polymorph-components/polymorph-test/actions/setup@3ec431717895b2e4fa81500794e0da7fd13e26e7
         with:
           tools: component-test-cli
           js-locks: |
@@ -133,7 +133,7 @@ jobs:
       # against the pin.
       - name: Publish the conformance matrix
         if: always() && hashFiles('conformance/driver-ct/results/*.jsonl') != ''
-        uses: polymorph-components/polymorph-test/actions/aggregate@f9ea8bbe7d2c407b6643b45e38b2ecf4aaee13a6
+        uses: polymorph-components/polymorph-test/actions/aggregate@3ec431717895b2e4fa81500794e0da7fd13e26e7
         with:
           lock: conformance/guest-ct/tests.lock
           manifest: conformance/driver-ct/targets.toml
