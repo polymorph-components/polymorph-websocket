@@ -480,6 +480,21 @@ impl Websocket {
             }
         };
 
+        // Latency-sensitive guests (QUIC over the message stream) write
+        // small messages back-to-back; Nagle would hold the second until
+        // the peer's delayed ACK. Browsers run WebSocket sockets with
+        // TCP_NODELAY; match them.
+        {
+            let tcp = match ws.get_ref() {
+                tokio_tungstenite::MaybeTlsStream::Plain(tcp) => Some(tcp),
+                tokio_tungstenite::MaybeTlsStream::Rustls(tls) => Some(tls.get_ref().0),
+                _ => None,
+            };
+            if let Some(tcp) = tcp {
+                let _ = tcp.set_nodelay(true);
+            }
+        }
+
         let negotiated = response
             .headers()
             .get("Sec-WebSocket-Protocol")
