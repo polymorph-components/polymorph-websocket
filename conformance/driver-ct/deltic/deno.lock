@@ -1,33 +1,41 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@deltic/ct-runner@0.1.0-pre.ga67ee83": "0.1.0-pre.ga67ee83",
-    "jsr:@deltic/runtime@0.1.0-pre.ga67ee83": "0.1.0-pre.ga67ee83",
-    "jsr:@deltic/runtime@~0.1.0-pre.ga67ee83": "0.1.0-pre.ga67ee83",
-    "jsr:@deltic/translator@0.1.0-pre.ga67ee83": "0.1.0-pre.ga67ee83",
-    "jsr:@deltic/wasi-shims@0.1.0-pre.ga67ee83": "0.1.0-pre.ga67ee83",
+    "jsr:@deltic/ct-runner@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
+    "jsr:@deltic/protocol@0.1": "0.1.0",
+    "jsr:@deltic/runtime@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
+    "jsr:@deltic/runtime@~0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
+    "jsr:@deltic/translator@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
+    "jsr:@deltic/wasi-shims@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
     "npm:playwright-core@^1.61.1": "1.62.1"
   },
   "jsr": {
-    "@deltic/ct-runner@0.1.0-pre.ga67ee83": {
-      "integrity": "d78e96eba54e53dabe7c1de5a67782aad755362824d741913ab4d36941ebfbcc",
+    "@deltic/ct-runner@0.1.0-pre.g50778a1": {
+      "integrity": "312e40aebc95411d1dbf12f74f5465c621007e1bb38815e9be56933b58a2fdcd",
       "dependencies": [
-        "jsr:@deltic/runtime@~0.1.0-pre.ga67ee83"
+        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
       ]
     },
-    "@deltic/runtime@0.1.0-pre.ga67ee83": {
-      "integrity": "2a2b0949031747a2340dc186299e654ea9f361ae39ac6bd633019940682db4ed"
+    "@deltic/protocol@0.1.0": {
+      "integrity": "c9d0adff11eac77ce56a28db163dc22bc74427864e0034d2b9d381daea144a1b"
     },
-    "@deltic/translator@0.1.0-pre.ga67ee83": {
-      "integrity": "e4f1bb219e56b62262b0c9665e3f6646aa13883b2cfbb9d6306f69d19974d412",
+    "@deltic/runtime@0.1.0-pre.g50778a1": {
+      "integrity": "e2e17d3be84cadadfcf5de3284f23c06172e1ed6d5c38dfb7bdcdb878050e10e",
       "dependencies": [
-        "jsr:@deltic/runtime@~0.1.0-pre.ga67ee83"
+        "jsr:@deltic/protocol"
       ]
     },
-    "@deltic/wasi-shims@0.1.0-pre.ga67ee83": {
-      "integrity": "a5754e65d50873e675695a51279989e22b3771e31f16a84a09feb15905c574a7",
+    "@deltic/translator@0.1.0-pre.g50778a1": {
+      "integrity": "4d95ca60719300b482cf90c147a8b33cf92550d408bf0a5718fbd6483887510a",
       "dependencies": [
-        "jsr:@deltic/runtime@~0.1.0-pre.ga67ee83"
+        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
+      ]
+    },
+    "@deltic/wasi-shims@0.1.0-pre.g50778a1": {
+      "integrity": "e1a3fe2da0ba7d9c4c632e905c9dbdcd50c1a3da9eaadaecf86d54add39d0446",
+      "dependencies": [
+        "jsr:@deltic/protocol",
+        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
       ]
     }
   },
@@ -39,10 +47,10 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deltic/ct-runner@0.1.0-pre.ga67ee83",
-      "jsr:@deltic/runtime@0.1.0-pre.ga67ee83",
-      "jsr:@deltic/translator@0.1.0-pre.ga67ee83",
-      "jsr:@deltic/wasi-shims@0.1.0-pre.ga67ee83"
+      "jsr:@deltic/ct-runner@0.1.0-pre.g50778a1",
+      "jsr:@deltic/runtime@0.1.0-pre.g50778a1",
+      "jsr:@deltic/translator@0.1.0-pre.g50778a1",
+      "jsr:@deltic/wasi-shims@0.1.0-pre.g50778a1"
     ],
     "packageJson": {
       "dependencies": [
