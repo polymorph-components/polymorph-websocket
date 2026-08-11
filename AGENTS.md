@@ -36,14 +36,15 @@ Layout (each directory's justfile module in parentheses):
   Its knobs are exported functions (`configure`,
   `setMaxInboundBufferBytes`, `setConnectTimeoutMs`, `setCloseTimeoutMs`);
   the module reads no ambient configuration. The
-  deltic release is pinned in `conformance/driver-ct/deltic/fetch-translator.ts`
-  (TAG + translator-shim sha256) and in TWO import maps —
-  `js/deltic/deno.json` and `conformance/driver-ct/deltic/deno.json` —
-  which must agree byte-for-byte on the `@deltic/runtime/embedder` URL
-  (deltic's `wasi-shims` imports it by bare specifier internally, so a
-  drift would load the embedder module twice and break `instanceof
-  WitError` across the boundary). Bump procedure:
-  `conformance/driver-ct/deltic/README.md`.
+  deltic release is pinned in TWO import maps — `js/deltic/deno.json` and
+  `conformance/driver-ct/deltic/deno.json` — as exact-pinned JSR
+  prereleases (`jsr:@deltic/<pkg>@0.1.0-pre.g<hash>`; a version names one
+  upstream commit) which must agree on the `@deltic/runtime` version
+  (deltic's `wasi-shims` imports `@deltic/runtime/embedder` by bare
+  specifier internally, so a drift would load the embedder module twice
+  and break `instanceof WitError` across the boundary); the root
+  justfile's `exam-deltic` recipe (CI-wired) asserts one version
+  repo-wide. Bump procedure: `conformance/driver-ct/deltic/README.md`.
 - `js/componentize/` (`just wpt::…`) — `websocket.js`, the WHATWG-API
   shim for componentize-js guests (deviations registry in its header), and
   the WPT parity gate (`wpt/README.md` is the vendoring policy; losses
@@ -64,8 +65,8 @@ Layout (each directory's justfile module in parentheses):
   records (`conformance-ct::_ct-tools`). One rev everywhere; the root
   `Cargo.toml` comment is the bump checklist. There is no transpiler
   dependency anywhere: the JS host legs are runtime-linked by the pinned
-  deltic release assets (single pin site:
-  `driver-ct/deltic/{deno.json,deno.lock,fetch-translator.ts}`).
+  deltic JSR prereleases (single pin site: `driver-ct/deltic/{deno.json,
+  deno.lock}`).
 - `examples/` (`just demo::…`) — the echo-demo guest and its host runners.
 
 Checks to run before committing, by what changed: WIT or `wit/README.md` →

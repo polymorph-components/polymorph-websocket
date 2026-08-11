@@ -11,10 +11,6 @@ import { spawnEchod } from "../../../../conformance/server/echod.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
-// Must agree with conformance/driver-ct/deltic/fetch-translator.ts's TAG
-// (the single pin site), as roundtrip.mjs does.
-const TAG = "pre-58b2404";
-
 const loadBytes = async (path) => new Uint8Array(await readFile(join(REPO_ROOT, path)));
 
 const { setSink, instantiateRunner } = await import(
@@ -23,7 +19,7 @@ const { setSink, instantiateRunner } = await import(
 setSink((record) => console.error("[smoke]", JSON.parse(record).name));
 
 const [translatorBytes, componentBytes] = await Promise.all([
-  loadBytes(`target/deltic/${TAG}/deltic-translator-shim.wasm`),
+  loadBytes("target/deltic-browser/deltic-translator-shim.wasm"),
   loadBytes("js/componentize/wpt/build/smoke.component.wasm"),
 ]);
 const runner = await instantiateRunner(translatorBytes, componentBytes);

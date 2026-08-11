@@ -30,10 +30,8 @@ import { spawnEchod, unreachableUrl } from "../../server/echod.mjs";
 
 const DELTIC_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(DELTIC_DIR, "..", "..", "..");
-// Must agree with fetch-translator.ts's TAG (the translator is served
-// from its cache directory).
-const TAG = "pre-58b2404";
 const WORKER_URL = "/target/deltic-browser/websocket-worker.mjs";
+const TRANSLATOR_URL = "/target/deltic-browser/deltic-translator-shim.wasm";
 const MAX_INBOUND_BUFFER_BYTES = 256 * 1024;
 const CASE_TIMEOUT_MS = 60_000;
 const STALL_TIMEOUT_MS = 90_000;
@@ -57,7 +55,7 @@ const { values } = parseArgs({
 async function main() {
   for (const [what, rel] of [
     ["bundled worker (run `just conformance-ct::run-deltic-browser`)", WORKER_URL],
-    [`translator asset (run fetch-translator.ts)`, `/target/deltic/${TAG}/deltic-translator-shim.wasm`],
+    [`translator asset (run \`just conformance-ct::run-deltic-browser\`)`, TRANSLATOR_URL],
     ["suite component (run `just conformance-ct::build-suite`)", "/target/wasm32-wasip2/release/conformance_guest_ct.wasm"],
   ]) {
     try {
@@ -83,7 +81,7 @@ async function main() {
       {
         suite: "conformance-guest-ct",
         target: values.target,
-        translatorUrl: `/target/deltic/${TAG}/deltic-translator-shim.wasm`,
+        translatorUrl: TRANSLATOR_URL,
         suiteUrl: "/target/wasm32-wasip2/release/conformance_guest_ct.wasm",
         missing: [],
         caseTimeoutMs: CASE_TIMEOUT_MS,

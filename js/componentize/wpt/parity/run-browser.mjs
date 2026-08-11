@@ -11,8 +11,8 @@
 // vendored group modules) resolve with no bundling and the same URL
 // identity legs.mjs relies on; the carrier itself is one bundle
 // (parity/build/deltic-carrier.mjs) and the two wasm artifacts it needs —
-// the pinned deltic translator under /target/deltic/ and the parity
-// runner component — are fetched from the same server. The page opens
+// the pinned deltic translator under /target/deltic-browser/ and the
+// parity runner component — are fetched from the same server. The page opens
 // `ws:` connections to the echo server directly: WebSocket is not subject
 // to CORS, and a localhost `http:` page may open `ws:` connections.
 //
@@ -38,10 +38,6 @@ import { spawnEchod } from "../../../../conformance/server/echod.mjs";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
 const update = process.argv.includes("--update");
-// Must agree with conformance/driver-ct/deltic/fetch-translator.ts's TAG
-// (the single pin site), as roundtrip.mjs does.
-const TAG = "pre-58b2404";
-
 const MIME = {
   ".js": "text/javascript",
   ".mjs": "text/javascript",
@@ -53,7 +49,7 @@ const MIME = {
 // The subtrees a page may read: the WPT gate's own tree (harness, groups,
 // reporter, parity modules, the carrier bundle and the runner component)
 // and the pinned deltic translator asset the carrier translates with.
-const SERVED_PREFIXES = ["/js/componentize/wpt/", "/target/deltic/"];
+const SERVED_PREFIXES = ["/js/componentize/wpt/", "/target/deltic-browser/"];
 
 /** Serve the repository layout, read-only, under SERVED_PREFIXES. */
 function startServer() {
@@ -95,12 +91,12 @@ function startServer() {
  * One leg, inside the browser page: import the shared leg bodies over
  * HTTP and run one of them. Serialized via `page.evaluate`.
  */
-async function runLegInPage({ base, wsBase, leg, tag }) {
+async function runLegInPage({ base, wsBase, leg }) {
   const legs = await import(`${base}/js/componentize/wpt/parity/legs.mjs`);
   if (leg === "baseline") return legs.runBaseline(wsBase);
   const carrier = {
     url: `${base}/js/componentize/wpt/parity/build/deltic-carrier.mjs`,
-    translatorPath: `target/deltic/${tag}/deltic-translator-shim.wasm`,
+    translatorPath: "target/deltic-browser/deltic-translator-shim.wasm",
     componentPath: "js/componentize/wpt/build/parity-runner.component.wasm",
     async loadBytes(path) {
       const resp = await fetch(`${base}/${path}`);
@@ -115,7 +111,7 @@ async function main() {
   for (const [what, rel] of [
     ["carrier bundle (run `just wpt::parity-chromium`)", "js/componentize/wpt/parity/build/deltic-carrier.mjs"],
     ["parity runner component (run `js/componentize/wpt/component.sh build`)", "js/componentize/wpt/build/parity-runner.component.wasm"],
-    ["translator asset (run conformance/driver-ct/deltic/fetch-translator.ts)", `target/deltic/${TAG}/deltic-translator-shim.wasm`],
+    ["translator asset (run `just wpt::parity-chromium`)", "target/deltic-browser/deltic-translator-shim.wasm"],
   ]) {
     try {
       await access(join(REPO_ROOT, rel));
@@ -144,7 +140,7 @@ async function main() {
       page.on("console", (msg) => process.stderr.write(`[browser] ${msg.text()}\n`));
       page.on("pageerror", (err) => console.error(`[browser error] ${err.stack ?? err.message}`));
       await page.goto(`${base}/`);
-      records[leg] = await page.evaluate(runLegInPage, { base, wsBase: echod.base, leg, tag: TAG });
+      records[leg] = await page.evaluate(runLegInPage, { base, wsBase: echod.base, leg });
       await page.close();
     }
   } finally {

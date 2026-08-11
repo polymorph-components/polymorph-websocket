@@ -19,11 +19,13 @@
 // legs.mjs must not import `../reporter.js` itself.
 //
 // THE DELTIC PIN IS SINGLE-SITE: this module resolves `@deltic/*` through
-// conformance/driver-ct/deltic/deno.json (the bundle recipe runs
-// `deno bundle` from that directory) and the translator asset comes from
-// that directory's fetch-translator.ts. Bundling from there is also what
-// keeps `@deltic/runtime/embedder` a single module instance across this
-// bundle and js/deltic/websocket.ts, so `instanceof WitError` holds.
+// conformance/driver-ct/deltic/deno.json (exact-pinned JSR prereleases;
+// the bundle recipe runs `deno bundle` from that directory) and the
+// translator asset is extracted from the packaged `@deltic/translator`
+// JSR package's lock-pinned module cache (no fetch step). Bundling from
+// there is also what keeps `@deltic/runtime/embedder` a single module
+// instance across this bundle and js/deltic/websocket.ts, so
+// `instanceof WitError` holds.
 
 import { Translator } from "@deltic/runtime/shim";
 import { instantiate } from "@deltic/runtime/embedder";

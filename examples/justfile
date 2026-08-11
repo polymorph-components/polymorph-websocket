@@ -20,17 +20,12 @@ wasmtime count="100": component build-echod
 # Run the JS-host demo by hand: `just demo::deltic [count]` — the same
 # component runtime-linked under deltic on stock Deno against
 # js/deltic/websocket.ts, with no transpile step and no engine flag. The
-# deltic pin is single-site: the import map and the translator asset both
-# come from conformance/driver-ct/deltic/.
+# translator comes from the packaged `@deltic/translator` JSR prerelease
+# through the module graph — no fetch step. The deltic pin is single-site:
+# the import map is conformance/driver-ct/deltic/deno.json.
 deltic count="100": component build-echod
     #!/usr/bin/env bash
     set -euo pipefail
-    shim=$(deno run \
-        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
-        --allow-read={{root}} \
-        --allow-write={{root}}/target/deltic \
-        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
-        {{root}}/conformance/driver-ct/deltic/fetch-translator.ts)
     # --allow-run is unscoped for the same reason run-deltic's is: Deno
     # refuses a scoped --allow-run whenever dynamic-linker vars sit in the
     # ambient environment (see the conformance-ct::run-deltic comment).
@@ -39,7 +34,7 @@ deltic count="100": component build-echod
         --allow-read={{root}} \
         --allow-net=127.0.0.1,localhost \
         --allow-run \
-        {{root}}/examples/deltic-demo/run.ts --translator "$shim" {{count}}
+        {{root}}/examples/deltic-demo/run.ts {{count}}
 
 [private]
 build-echod:

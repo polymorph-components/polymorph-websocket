@@ -19,7 +19,7 @@
 // exports run on the callback ABI under stock Deno.
 //
 //   just conformance-ct::run-deltic          # the full leg
-//   … run.ts --translator <shim.wasm> [--only SUBSTRING] [--jspi]
+//   … run.ts [--translator <shim.wasm>] [--only SUBSTRING] [--jspi]
 //
 // `DENO_CERT` must name the suite's committed test CA so the three
 // `websocket/tls/*` cases can complete their handshake; the
@@ -30,8 +30,13 @@
 // MODULE-IDENTITY CONSTRAINT: deltic's wasi-shims module imports
 // `@deltic/runtime/embedder` by bare specifier internally; this leg's
 // `deno.json` AND `js/deltic/deno.json` must map that specifier to the
-// IDENTICAL pinned URL, or the embedder module loads twice and
-// `instanceof WitError` stops holding across the module boundary.
+// IDENTICAL exact-pinned JSR version, or the embedder module loads twice
+// and `instanceof WitError` stops holding across the module boundary.
+//
+// The translator comes from the packaged `@deltic/translator` JSR
+// prerelease (defaultTranslator()) by default — no fetch step, no
+// sha256 bookkeeping, no net grant; `--translator <path>` remains as an
+// optional override for a locally-built translator shim.
 //
 // The suite artifact is the BARE suite — websocket still imported — so
 // the run actually exercises the host module; the sibling `composed/`
@@ -40,6 +45,7 @@
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
+import { defaultTranslator } from "@deltic/translator";
 import { runSuite } from "@deltic/ct-runner";
 import { wasiShims } from "@deltic/wasi-shims";
 import { configure, websocketImports } from "../../../js/deltic/websocket.ts";
@@ -170,8 +176,10 @@ async function ensureEchod(): Promise<void> {
   );
 }
 
-async function loadArtifacts(translatorPath: string): Promise<ComponentArtifacts> {
-  const translator = await Translator.create(await Deno.readFile(translatorPath));
+async function loadArtifacts(translatorPath?: string): Promise<ComponentArtifacts> {
+  const translator = translatorPath
+    ? await Translator.create(await Deno.readFile(translatorPath))
+    : await defaultTranslator();
   const componentBytes = await Deno.readFile(SUITE_WASM);
   const { plan, adapters } = translator.translate(componentBytes);
   return { plan, componentBytes, adapters };
@@ -179,14 +187,6 @@ async function loadArtifacts(translatorPath: string): Promise<ComponentArtifacts
 
 async function main() {
   const cli = parseArgs(Deno.args);
-
-  if (!cli.translator) {
-    throw new Error(
-      "missing required --translator <path>; fetch the pinned release " +
-        "asset with `deno run ... conformance/driver-ct/deltic/fetch-translator.ts` " +
-        "(see that script for exact permissions).",
-    );
-  }
 
   if (Deno.env.get("DENO_CERT") === undefined) {
     console.error(

@@ -68,3 +68,18 @@ test:
 # leg itself is `conformance-ct::run-deltic`.
 deltic-module-check:
     cd js/deltic && deno task check && deno task test
+
+# The one-version-everywhere gate: every `jsr:@deltic/*` import across
+# BOTH deno.json files that carry deltic imports must agree on the exact
+# same pinned version (the retired release-asset pin gate, generalized to
+# every package, not just the runtime/embedder URL).
+exam-deltic:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    v=$(grep -ho 'jsr:@deltic/[a-z-]*@[^/"]*' js/deltic/deno.json conformance/driver-ct/deltic/deno.json \
+        | sed 's/.*@//' | sort -u)
+    if [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
+        echo "deltic pin drift: $v" >&2
+        exit 1
+    fi
+    echo "deltic pin: $v"
