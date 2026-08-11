@@ -31,6 +31,7 @@ rust-checks:
     @just gha::_step test
 
 conformance-checks:
+    @just gha::_step exam-deltic
     @just gha::_step conformance-ct::all
     @just gha::_step deltic-module-check
     @just gha::_step wpt::parity

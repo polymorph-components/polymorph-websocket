@@ -131,27 +131,21 @@ run-composed: compose-suite build-driver build-echod
         --jsonl --jobs 4 --target composed > {{results}}/composed.jsonl
 
 # The deltic-native leg: runtime-linked under stock Deno, no transpile
-# step. fetch-translator.ts owns the release-asset pin (TAG +
-# TRANSLATOR_SHA256, cross-checked against both deno.json import maps);
-# run.ts owns the suite run. Scoped permissions throughout, EXCEPT
-# --allow-run: Deno refuses a *scoped* --allow-run outright whenever
-# dynamic-linker vars (LD_LIBRARY_PATH etc.) sit in the ambient
-# environment — they could redirect the allowed binary, and no
-# --allow-env grant lifts the refusal (verified on Deno 2.9.5). Ambient
-# LD_LIBRARY_PATH is common on dev machines and run.ts is in-repo
-# trusted code, so --allow-run stays unscoped; the spawn target is
-# still just the echod binary. DENO_CERT provisions trust for the
+# step. The translator comes from the packaged `@deltic/translator` JSR
+# prerelease through the module graph — no fetch step, no sha256
+# bookkeeping, no net grant. run.ts owns the suite run. Scoped
+# permissions throughout, EXCEPT --allow-run: Deno refuses a *scoped*
+# --allow-run outright whenever dynamic-linker vars (LD_LIBRARY_PATH
+# etc.) sit in the ambient environment — they could redirect the allowed
+# binary, and no --allow-env grant lifts the refusal (verified on Deno
+# 2.9.5). Ambient LD_LIBRARY_PATH is common on dev machines and run.ts is
+# in-repo trusted code, so --allow-run stays unscoped; the spawn target
+# is still just the echod binary. DENO_CERT provisions trust for the
 # suite's committed test PKI, the Deno analogue of the NODE_EXTRA_CA_CERTS
 # the retired jco Node leg carried (see git history).
 run-deltic: build-suite build-echod
     #!/usr/bin/env bash
     set -euo pipefail
-    shim=$(deno run \
-        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
-        --allow-read={{root}} \
-        --allow-write={{root}}/target/deltic \
-        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
-        {{root}}/conformance/driver-ct/deltic/fetch-translator.ts)
     mkdir -p {{results}}
     DENO_CERT={{root}}/conformance/server/tls/ca.pem {{timeout_cmd}} deno run \
         --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
@@ -161,7 +155,7 @@ run-deltic: build-suite build-echod
         --allow-run \
         --allow-env=DENO_CERT \
         {{root}}/conformance/driver-ct/deltic/run.ts \
-        --translator "$shim" --out {{results}}/deltic-deno.jsonl --target deltic-deno
+        --out {{results}}/deltic-deno.jsonl --target deltic-deno
 
 # The deltic browser driver's npm tree (the upstream page driver +
 # worker message loop + playwright-core; no transpiler).
@@ -177,16 +171,12 @@ _deltic-browser-prepared:
 # host module: the worker is one deno-bundled module (engine + host
 # module + message loop; browser/worker-entry.ts), so no transpile step
 # and no generated tree.
-run-deltic-browser: build-suite build-echod _deltic-browser-prepared
+run-deltic-browser: build-suite build-echod _deltic-browser-prepared (extract-deltic-translator root / "target/deltic-browser")
     #!/usr/bin/env bash
     set -euo pipefail
     cd {{root}}/conformance/driver-ct/deltic
-    deno run --config deno.json --frozen \
-        --allow-read={{root}} --allow-write={{root}}/target/deltic \
-        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
-        fetch-translator.ts >/dev/null
     mkdir -p {{root}}/target/deltic-browser
-    deno bundle --config deno.json --platform browser \
+    deno bundle --config deno.json --frozen --platform browser \
         -o {{root}}/target/deltic-browser/websocket-worker.mjs browser/worker-entry.ts
     mkdir -p {{results}}
     {{timeout_cmd}} node run-browser.mjs

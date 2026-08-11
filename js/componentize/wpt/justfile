@@ -9,8 +9,10 @@
 # (this directory) for the vendoring policy and architecture.
 #
 # The deltic pin is single-site: the carrier bundle resolves @deltic/*
-# through conformance/driver-ct/deltic/deno.json and its translator asset
-# comes from that directory's fetch-translator.ts.
+# through conformance/driver-ct/deltic/deno.json (exact-pinned JSR
+# prereleases; see that deno.json's MODULE-IDENTITY comment) and its
+# translator asset is extracted from the packaged `@deltic/translator`
+# JSR package's lock-pinned module cache (no fetch step).
 
 import '../../../justfile.shared.just'
 
@@ -73,18 +75,14 @@ _artifacts: build-echod _carrier
 # The round trip's carrier: the pinned deltic translator asset, plus the
 # one bundle that carries the engine, the host module, and the reporter
 # instance the runner's import is wired to (deltic-carrier.ts's header
-# explains why one bundle is the sound shape). Both the fetch and the
+# explains why one bundle is the sound shape). Both the extraction and the
 # bundle run out of conformance/driver-ct/deltic — the single deltic pin
 # site — mirroring conformance-ct::run-deltic-browser.
 [private]
-_carrier:
+_carrier: (extract-deltic-translator root / "target/deltic-browser")
     #!/usr/bin/env bash
     set -euo pipefail
     cd '{{root}}/conformance/driver-ct/deltic'
-    deno run --config deno.json --frozen \
-        --allow-read={{root}} --allow-write={{root}}/target/deltic \
-        --allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com \
-        fetch-translator.ts >/dev/null
     mkdir -p {{root}}/js/componentize/wpt/parity/build
     deno bundle --config deno.json --frozen --platform browser \
         -o {{root}}/js/componentize/wpt/parity/build/deltic-carrier.mjs \

@@ -10,18 +10,20 @@
 // component and drove the same `demo.run(url, count)` export.
 //
 //   just demo::deltic [count]
-//   … run.ts --translator <shim.wasm> [count]
+//   … run.ts [--translator <shim.wasm>] [count]
 //
 // The deltic pin is SINGLE-SITE: this runner resolves `@deltic/*` through
-// conformance/driver-ct/deltic/deno.json and takes the translator asset
-// from conformance/driver-ct/deltic/fetch-translator.ts (the justfile
-// recipe fetches it and passes the cached path). The same import map is
-// what keeps `instanceof WitError` holding across the host-module
-// boundary (see that deno.json's MODULE-IDENTITY note).
+// conformance/driver-ct/deltic/deno.json. The translator comes from the
+// packaged `@deltic/translator` JSR prerelease by default (no fetch
+// step); `--translator <path>` remains as an optional override for a
+// locally-built translator shim. The same import map is what keeps
+// `instanceof WitError` holding across the host-module boundary (see
+// that deno.json's MODULE-IDENTITY note).
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
 import { instantiate, WitError } from "@deltic/runtime/embedder";
+import { defaultTranslator } from "@deltic/translator";
 import { wasiShims } from "@deltic/wasi-shims";
 import { websocketImports } from "../../js/deltic/websocket.ts";
 
@@ -94,8 +96,10 @@ async function spawnEchod(): Promise<{ base: string; shutdown: () => void }> {
   }
 }
 
-async function loadArtifacts(translatorPath: string): Promise<ComponentArtifacts> {
-  const translator = await Translator.create(await Deno.readFile(translatorPath));
+async function loadArtifacts(translatorPath?: string): Promise<ComponentArtifacts> {
+  const translator = translatorPath
+    ? await Translator.create(await Deno.readFile(translatorPath))
+    : await defaultTranslator();
   const componentBytes = await Deno.readFile(DEMO_WASM);
   const { plan, adapters } = translator.translate(componentBytes);
   return { plan, componentBytes, adapters };
@@ -103,13 +107,6 @@ async function loadArtifacts(translatorPath: string): Promise<ComponentArtifacts
 
 async function main() {
   const cli = parseArgs(Deno.args);
-  if (!cli.translator) {
-    throw new Error(
-      "missing required --translator <path>; fetch the pinned release " +
-        "asset with `deno run ... conformance/driver-ct/deltic/fetch-translator.ts` " +
-        "(the `just demo::deltic` recipe does it for you).",
-    );
-  }
 
   const artifacts = await loadArtifacts(cli.translator);
   const echod = await spawnEchod();

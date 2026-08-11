@@ -16,14 +16,9 @@ import { runRoundtrip } from "./legs.mjs";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
 
-// Must agree with conformance/driver-ct/deltic/fetch-translator.ts's TAG
-// (the single pin site; the asset is served out of its cache directory),
-// exactly as conformance/driver-ct/deltic/run-browser.mjs pins it.
-const TAG = "pre-58b2404";
-
 const carrier = {
   url: pathToFileURL(join(HERE, "build", "deltic-carrier.mjs")).href,
-  translatorPath: `target/deltic/${TAG}/deltic-translator-shim.wasm`,
+  translatorPath: "target/deltic-browser/deltic-translator-shim.wasm",
   componentPath: "js/componentize/wpt/build/parity-runner.component.wasm",
   async loadBytes(path) {
     return new Uint8Array(await readFile(join(REPO_ROOT, path)));
