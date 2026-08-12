@@ -17,12 +17,12 @@
 // packaged `@deltic/translator` JSR prerelease by default (no fetch
 // step); `--translator <path>` remains as an optional override for a
 // locally-built translator shim. The same import map is what keeps
-// `instanceof WitError` holding across the host-module boundary (see
+// `instanceof ComponentException` holding across the host-module boundary (see
 // that deno.json's MODULE-IDENTITY note).
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
-import { instantiate, WitError } from "@deltic/runtime/embedder";
+import { ComponentException, instantiate } from "@deltic/runtime/embedder";
 import { defaultTranslator } from "@deltic/translator";
 import { wasiShims } from "@deltic/wasi-shims";
 import { websocketImports } from "../../js/deltic/websocket.ts";
@@ -121,12 +121,12 @@ async function main() {
     };
     // The export's `result<u32, string>` lifts to return-or-throw in
     // return position (contracts/embedder-api.md §"Value mapping"): the
-    // err payload rides a branded `WitError`.
+    // err payload rides a branded `ComponentException`.
     try {
       const received = await demo.run(`${echod.base}/echo`, cli.count);
       console.log(`round-tripped ${received}/${cli.count} messages`);
     } catch (err) {
-      const detail = err instanceof WitError ? err.payload : err;
+      const detail = err instanceof ComponentException ? err.payload : err;
       console.error(`demo failed: ${detail}`);
       Deno.exitCode = 1;
     }

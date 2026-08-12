@@ -1,17 +1,17 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@deltic/protocol@0.1": "0.1.0",
-    "jsr:@deltic/runtime@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
+    "jsr:@deltic/protocol@0.2": "0.2.0",
+    "jsr:@deltic/runtime@0.1.0-pre.g078aa15": "0.1.0-pre.g078aa15",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.14"
   },
   "jsr": {
-    "@deltic/protocol@0.1.0": {
-      "integrity": "c9d0adff11eac77ce56a28db163dc22bc74427864e0034d2b9d381daea144a1b"
+    "@deltic/protocol@0.2.0": {
+      "integrity": "028be6a3623c5e910598aa7a199209b85e8931ae484ac7f6638d610ddb0e19fa"
     },
-    "@deltic/runtime@0.1.0-pre.g50778a1": {
-      "integrity": "e2e17d3be84cadadfcf5de3284f23c06172e1ed6d5c38dfb7bdcdb878050e10e",
+    "@deltic/runtime@0.1.0-pre.g078aa15": {
+      "integrity": "5e64f8dc6d32190ecd394d6ad9881eb0fa97b6598b1e7f2ef1d52cff4674287c",
       "dependencies": [
         "jsr:@deltic/protocol"
       ]
@@ -28,7 +28,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deltic/runtime@0.1.0-pre.g50778a1"
+      "jsr:@deltic/runtime@0.1.0-pre.g078aa15"
     ]
   }
 }
