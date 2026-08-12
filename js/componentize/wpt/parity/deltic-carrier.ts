@@ -25,7 +25,7 @@
 // JSR package's lock-pinned module cache (no fetch step). Bundling from
 // there is also what keeps `@deltic/runtime/embedder` a single module
 // instance across this bundle and js/deltic/websocket.ts, so
-// `instanceof WitError` holds.
+// `instanceof ComponentException` holds.
 
 import { Translator } from "@deltic/runtime/shim";
 import { instantiate } from "@deltic/runtime/embedder";

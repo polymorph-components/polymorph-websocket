@@ -36,7 +36,7 @@ prereleases"). It is pinned in **two** places, both required to agree:
   SAME `@deltic/runtime` version (the module-identity constraint: deltic's
   `wasi-shims` imports `@deltic/runtime/embedder` by bare specifier
   internally, so every config resolving it must agree, or the embedder
-  module loads twice and `instanceof WitError` stops holding across the
+  module loads twice and `instanceof ComponentException` stops holding across the
   boundary).
 
 `@deltic/translator` ships the translator wasm asset **for the same
