@@ -23,8 +23,8 @@ import {
   buildHarnessPage,
   findChrome,
   runPageHarness,
-} from "@polymorph/component-test-js/browser-driver";
-import { writeResultsFile } from "@polymorph/component-test-js/node-runner";
+} from "@jsr/polymorph__test/browser-driver";
+import { writeResultsFile } from "@jsr/polymorph__test/node-runner";
 
 import { spawnEchod, unreachableUrl } from "../../server/echod.mjs";
 
