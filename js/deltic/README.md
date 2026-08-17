@@ -35,8 +35,12 @@ identically on Deno.
 `deno.json`'s `@deltic/runtime/embedder` import maps to the exact same
 pinned URL as `conformance/driver-ct/deltic/deno.json`. deltic's
 `wasi-shims` module imports that specifier by bare name internally; if the
-two configs ever disagreed, the embedder module would load twice and
-`instanceof ComponentException` would stop holding across the boundary. Keep both
+two configs ever disagreed, the embedder module would load twice. This
+module recognizes deltic values by `@deltic/protocol` brand predicates
+(`isComponentException`, the `STREAM` brand), so recognition holds even in
+a multi-copy graph — but a duplicated embedder still splits the
+runtime/translator plan-format pairing, and stateful handles
+(streams/futures) minted by one copy are refused by the other. Keep both
 import maps byte-identical for that one entry.
 
 ## Unit tests

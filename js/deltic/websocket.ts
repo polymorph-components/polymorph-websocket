@@ -28,7 +28,10 @@
 
 import {
   ComponentException,
-  Stream,
+  hasBrand,
+  isComponentException,
+  STREAM,
+  type Stream,
   type StreamSource,
 } from "@deltic/runtime/embedder";
 
@@ -521,9 +524,11 @@ export class Websocket {
         sent += 1n;
       }
     } catch (error) {
-      // A WIT error variant passes through; anything else is a host-side
-      // failure and must not masquerade as a normal close. websocket.js:370-378.
-      const payload: WebsocketError = error instanceof ComponentException
+      // A WIT error variant passes through — recognized by its
+      // process-global brand, so a `ComponentException` minted by any
+      // runtime copy counts; anything else is a host-side failure and must
+      // not masquerade as a normal close. websocket.js:370-378.
+      const payload: WebsocketError = isComponentException(error)
         ? error.payload as WebsocketError
         : { kind: "other", value: String(error) };
       throw new ComponentException<SendViaStreamError>(
@@ -894,12 +899,15 @@ async function collectByteStream(
     } finally {
       reader.releaseLock();
     }
-  } else if (stream instanceof Stream) {
-    // The conventions' `Stream<u8>`: `read(max)` yields a `Uint8Array`, and
-    // an EMPTY chunk means end-of-stream (contracts/embedder-api.md
-    // §"Streams and futures"). Read in batches rather than per element.
+  } else if (hasBrand(stream, STREAM)) {
+    // The conventions' `Stream<u8>`, recognized by its process-global brand
+    // (a handle minted by any runtime copy dispatches here): `read(max)`
+    // yields a `Uint8Array`, and an EMPTY chunk means end-of-stream
+    // (contracts/embedder-api.md §"Streams and futures"). Read in batches
+    // rather than per element.
+    const handle = stream as Stream<number>;
     for (;;) {
-      const chunk = await stream.read(READ_BATCH);
+      const chunk = await handle.read(READ_BATCH);
       if ((chunk as Uint8Array).length === 0) break;
       push(chunk);
     }

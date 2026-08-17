@@ -16,13 +16,13 @@
 // conformance/driver-ct/deltic/deno.json. The translator comes from the
 // packaged `@deltic/translator` JSR prerelease by default (no fetch
 // step); `--translator <path>` remains as an optional override for a
-// locally-built translator shim. The same import map is what keeps
-// `instanceof ComponentException` holding across the host-module boundary (see
-// that deno.json's MODULE-IDENTITY note).
+// locally-built translator shim. The same import map keeps one embedder
+// instance — one runtime/translator plan-format pairing — in the graph
+// (see that deno.json's MODULE-IDENTITY note).
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
-import { ComponentException, instantiate } from "@deltic/runtime/embedder";
+import { instantiate, isComponentException } from "@deltic/runtime/embedder";
 import { defaultTranslator } from "@deltic/translator";
 import { wasi } from "@deltic/wasi";
 import { websocketImports } from "../../js/deltic/websocket.ts";
@@ -126,7 +126,7 @@ async function main() {
       const received = await demo.run(`${echod.base}/echo`, cli.count);
       console.log(`round-tripped ${received}/${cli.count} messages`);
     } catch (err) {
-      const detail = err instanceof ComponentException ? err.payload : err;
+      const detail = isComponentException(err) ? err.payload : err;
       console.error(`demo failed: ${detail}`);
       Deno.exitCode = 1;
     }
