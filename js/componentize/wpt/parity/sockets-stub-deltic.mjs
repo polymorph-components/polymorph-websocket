@@ -2,7 +2,7 @@
 // instantiation.
 //
 // The componentize-js runtime imports the seven `wasi:sockets@0.2`
-// interfaces unconditionally, and deltic's `wasiShims()` deliberately
+// interfaces unconditionally, and deltic's `wasi()` deliberately
 // excludes sockets (mission scope: p2 baseline + p3 clocks). The parity
 // runner never opens a socket — every WebSocket it drives goes through
 // `polymorph:websocket/connections` — so every member here exists only to
@@ -13,7 +13,7 @@
 // This is the deltic-keyed reshape of the jco-era `sockets-stub.mjs`
 // (same inventory, same throw-if-reached posture; removed with the jco
 // legs, see git history). Keys are compatibility-**track** keys (`@0.2`),
-// the same registration form `@deltic/wasi-shims` uses, so one provider
+// the same registration form `@deltic/wasi` uses, so one provider
 // serves whichever 0.2.x minor the guest's binary happens to name
 // (contracts/embedder-api.md §"Version canonicalization").
 
@@ -34,7 +34,7 @@ export class UdpSocket extends StubResource {}
 export class IncomingDatagramStream extends StubResource {}
 export class OutgoingDatagramStream extends StubResource {}
 
-/** The imports-record fragment: `{ ...socketsStubs() }` beside `wasiShims()`. */
+/** The imports-record fragment: `{ ...socketsStubs() }` beside `wasi()`. */
 export function socketsStubs() {
   return {
     "wasi:sockets/instance-network@0.2": {

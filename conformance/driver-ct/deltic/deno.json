@@ -1,11 +1,11 @@
 {
-  "//": "MODULE-IDENTITY CONSTRAINT: deltic's wasi-shims module imports @deltic/runtime/embedder by bare specifier internally. The @deltic/runtime/embedder entry here must map to the IDENTICAL exact-pinned JSR version as ../../../js/deltic/deno.json's entry, or the embedder module loads twice and `instanceof ComponentException` stops holding across the module boundary. Pin story: 0.1.0-pre.ga2f84a5 names one upstream deltic commit; @deltic/translator ships the translator wasm for that SAME commit; deno.lock carries integrity, --frozen enforced everywhere; one version repo-wide is asserted by the pin gate (justfile: exam-deltic).",
+  "//": "MODULE-IDENTITY CONSTRAINT: deltic's wasi module imports @deltic/runtime/embedder by bare specifier internally. The @deltic/runtime/embedder entry here must map to the IDENTICAL exact-pinned JSR version as ../../../js/deltic/deno.json's entry, or the embedder module loads twice and `instanceof ComponentException` stops holding across the module boundary. Pin story: exact-pinned JSR releases (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor; per-commit `<next>-pre.g<hash>` prereleases exist between releases — pin exactly); @deltic/translator ships the translator wasm for that SAME commit; deno.lock carries integrity, --frozen enforced everywhere; one version repo-wide is asserted by the pin gate (justfile: exam-deltic).",
   "imports": {
-    "@deltic/ct-runner": "jsr:@deltic/ct-runner@0.1.0-pre.ga2f84a5",
-    "@deltic/runtime/embedder": "jsr:@deltic/runtime@0.1.0-pre.ga2f84a5/embedder",
-    "@deltic/runtime/shim": "jsr:@deltic/runtime@0.1.0-pre.ga2f84a5/shim",
-    "@deltic/wasi-shims": "jsr:@deltic/wasi-shims@0.1.0-pre.ga2f84a5",
-    "@deltic/translator": "jsr:@deltic/translator@0.1.0-pre.ga2f84a5",
+    "@deltic/ct-runner": "jsr:@deltic/ct-runner@0.1.0",
+    "@deltic/runtime/embedder": "jsr:@deltic/runtime@0.1.0/embedder",
+    "@deltic/runtime/shim": "jsr:@deltic/runtime@0.1.0/shim",
+    "@deltic/wasi": "jsr:@deltic/wasi@0.1.0",
+    "@deltic/translator": "jsr:@deltic/translator@0.1.0",
     "@polymorph/component-test-js/deltic-worker-main": "./node_modules/@polymorph/component-test-js/js/runner-deltic/worker-main.mjs"
   },
   "minimumDependencyAge": { "age": "P1D", "exclude": ["jsr:@deltic/*"] },

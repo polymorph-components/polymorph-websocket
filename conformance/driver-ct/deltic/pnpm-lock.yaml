@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@polymorph/component-test-js':
-        specifier: github:polymorph-components/polymorph-test#3ec431717895b2e4fa81500794e0da7fd13e26e7
-        version: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7
+        specifier: github:polymorph-components/polymorph-test#b4444a25a22106ad4128549bdc9e579552e62210
+        version: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/b4444a25a22106ad4128549bdc9e579552e62210
       playwright-core:
         specifier: ^1.61.1
         version: 1.62.1
 
 packages:
 
-  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7':
-    resolution: {gitHosted: true, integrity: sha512-Y2sc0jPnTc/UKXgB5jWth4UK+45KikzSGRsj0TeeIhKMJ27a1vrFMfC89RILVJU/5JzJ65f5SvKillJT65vtxA==, tarball: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7}
-    version: 0.2.0
+  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/b4444a25a22106ad4128549bdc9e579552e62210':
+    resolution: {gitHosted: true, integrity: sha512-Dy/z2SUF809cxGKpNl0/4Po1hDmv8RrwjyJpAASdBIYExDBjKjAuP3wuuHYlN81/3+5q+iqwyoDjpqNAxMVM/g==, tarball: https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/b4444a25a22106ad4128549bdc9e579552e62210}
+    version: 0.1.0
 
   playwright-core@1.62.1:
     resolution: {integrity: sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==}
@@ -28,6 +28,6 @@ packages:
 
 snapshots:
 
-  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/3ec431717895b2e4fa81500794e0da7fd13e26e7': {}
+  '@polymorph/component-test-js@https://codeload.github.com/polymorph-components/polymorph-test/tar.gz/b4444a25a22106ad4128549bdc9e579552e62210': {}
 
   playwright-core@1.62.1: {}
