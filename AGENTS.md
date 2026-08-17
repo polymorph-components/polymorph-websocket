@@ -42,7 +42,9 @@ Layout (each directory's justfile module in parentheses):
   upstream commit) which must agree on the `@deltic/runtime` version
   (deltic's `wasi-shims` imports `@deltic/runtime/embedder` by bare
   specifier internally, so a drift would load the embedder module twice
-  and break `instanceof WitError` across the boundary); the root
+  and split the runtime/translator plan-format pairing; value recognition
+  itself is brand-based — deltic's `@deltic/protocol` predicates, not
+  `instanceof` — and survives a multi-copy graph); the root
   justfile's `exam-deltic` recipe (CI-wired) asserts one version
   repo-wide. Bump procedure: `conformance/driver-ct/deltic/README.md`.
 - `js/componentize/` (`just wpt::…`) — `websocket.js`, the WHATWG-API

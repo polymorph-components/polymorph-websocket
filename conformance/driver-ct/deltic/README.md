@@ -36,8 +36,9 @@ prereleases"). It is pinned in **two** places, both required to agree:
   SAME `@deltic/runtime` version (the module-identity constraint: deltic's
   `wasi-shims` imports `@deltic/runtime/embedder` by bare specifier
   internally, so every config resolving it must agree, or the embedder
-  module loads twice and `instanceof WitError` stops holding across the
-  boundary).
+  module loads twice — the host module's brand-based value recognition
+  survives that, but a second copy splits the runtime/translator
+  plan-format pairing).
 
 `@deltic/translator` ships the translator wasm asset **for the same
 commit** as `@deltic/runtime`, so the plan-format coupling is

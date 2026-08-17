@@ -23,9 +23,10 @@
 // the bundle recipe runs `deno bundle` from that directory) and the
 // translator asset is extracted from the packaged `@deltic/translator`
 // JSR package's lock-pinned module cache (no fetch step). Bundling from
-// there is also what keeps `@deltic/runtime/embedder` a single module
-// instance across this bundle and js/deltic/websocket.ts, so
-// `instanceof WitError` holds.
+// there also keeps `@deltic/runtime/embedder` a single module instance
+// across this bundle and js/deltic/websocket.ts — one runtime/translator
+// plan-format pairing (value recognition is brand-based and would
+// survive a multi-copy bundle; the pairing would not).
 
 import { Translator } from "@deltic/runtime/shim";
 import { instantiate } from "@deltic/runtime/embedder";

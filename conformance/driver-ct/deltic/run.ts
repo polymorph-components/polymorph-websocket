@@ -31,7 +31,8 @@
 // `@deltic/runtime/embedder` by bare specifier internally; this leg's
 // `deno.json` AND `js/deltic/deno.json` must map that specifier to the
 // IDENTICAL exact-pinned JSR version, or the embedder module loads twice
-// and `instanceof WitError` stops holding across the module boundary.
+// and the graph carries two runtime/translator plan-format pairings (the
+// host module's value recognition is brand-based and survives that).
 //
 // The translator comes from the packaged `@deltic/translator` JSR
 // prerelease (defaultTranslator()) by default — no fetch step, no

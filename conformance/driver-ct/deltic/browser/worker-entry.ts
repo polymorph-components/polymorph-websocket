@@ -2,11 +2,10 @@
 // surface (the local browser-bundle-entry.ts, re-exporting the pinned
 // JSR packages' public surface), the upstream worker message loop, and
 // this repo's deltic host module, resolved through ONE import map so the
-// emitted bundle carries exactly one embedder module instance — which is
-// what keeps `instanceof WitError` true when the host module throws
-// across the component boundary (workers resolve no import maps, so
-// bundling is the only sound shape; see @polymorph/component-test-js's
-// runner-deltic README).
+// emitted bundle carries exactly one embedder module instance — one
+// runtime/translator plan-format pairing, one copy on the runtime's
+// copy census (workers resolve no import maps, so bundling is the only
+// sound shape; see @polymorph/component-test-js's runner-deltic README).
 //
 // Built by `just conformance-ct::run-deltic-browser` with
 // `deno bundle --platform browser` into target/deltic-browser/, and

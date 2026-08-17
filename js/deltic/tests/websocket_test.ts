@@ -13,6 +13,7 @@ import { WitError } from "@deltic/runtime/embedder";
 import {
   currentConfig,
   resetConfig,
+  type SendViaStreamError,
   setConnectTimeoutMs,
   setMaxInboundBufferBytes,
   type StreamMessage,
@@ -207,6 +208,68 @@ Deno.test("receive-via-stream: single-use; pending receive is rejected", async (
     assertWitTag(() => ws.receiveViaStream(), "receiving-via-stream");
     await assertRejectsWitTag(() => ws.receive(), "receiving-via-stream");
     await stream.cancel();
+    ws.close(1000, "");
+    await ws.waitClosed();
+  });
+});
+
+// The two tests below hand-roll deltic values from nothing but the
+// @deltic/protocol registry brands (`Symbol.for` keys pinned by upstream's
+// own tests): per the protocol contract, an object carrying the brand is a
+// legal value from ANY runtime copy, so these prove the module's
+// recognition sites work without class identity — the multi-copy exposure
+// #48 closes. The literal `/1` keys are deliberate: a brand-generation
+// bump upstream must fail here and force the recognition sites to be
+// revisited.
+
+Deno.test("send-via-stream: a foreign-copy WitError's payload passes through the error wrap", async () => {
+  await withServer(async (s) => {
+    const ws = await Websocket.connect(`${s.base}/echo`, []);
+    const foreign = Object.assign(new Error("minted elsewhere"), {
+      [Symbol.for("deltic.witError/1")]: true,
+      payload: { tag: "invalid-argument", val: "minted by another copy" },
+    });
+    const producer = (async function* () {
+      throw foreign;
+    })();
+    const e = await assertRejects(
+      () => ws.sendViaStream(producer as unknown as Parameters<Websocket["sendViaStream"]>[0]),
+      WitError,
+    ) as WitError<SendViaStreamError>;
+    // The structured payload must pass through, not be flattened to
+    // `{ tag: "other", val: String(error) }` as an unrecognized throw is.
+    assertEquals(e.payload.error, {
+      tag: "invalid-argument",
+      val: "minted by another copy",
+    } as WebsocketError);
+    assertEquals(e.payload.sent, 0n);
+    ws.close(1000, "");
+    await ws.waitClosed();
+  });
+});
+
+Deno.test("send-via-stream: a hand-rolled branded byte stream takes the batched-read path", async () => {
+  await withServer(async (s) => {
+    const ws = await Websocket.connect(`${s.base}/echo`, []);
+    const payload = new Uint8Array([104, 101, 121]);
+    // A minimal branded `Stream<u8>`: the brand plus the conventions'
+    // `read(max)` (empty chunk = end-of-stream). Deliberately neither a
+    // `ReadableStream` nor async-iterable, so only brand recognition can
+    // route it to the batched-read branch.
+    let reads = 0;
+    const data = {
+      [Symbol.for("deltic.stream/1")]: true,
+      read(_max: number): Promise<Uint8Array> {
+        reads += 1;
+        return Promise.resolve(reads === 1 ? payload : new Uint8Array(0));
+      },
+    };
+    const producer = (async function* () {
+      yield { kind: "binary", length: payload.length, data };
+    })();
+    await ws.sendViaStream(producer as unknown as Parameters<Websocket["sendViaStream"]>[0]);
+    const echoed = await ws.receive();
+    assertEquals(echoed, { tag: "binary", val: payload });
     ws.close(1000, "");
     await ws.waitClosed();
   });
