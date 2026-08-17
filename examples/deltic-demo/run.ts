@@ -22,9 +22,9 @@
 
 import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
-import { instantiate, isWitError } from "@deltic/runtime/embedder";
+import { instantiate, isComponentException } from "@deltic/runtime/embedder";
 import { defaultTranslator } from "@deltic/translator";
-import { wasiShims } from "@deltic/wasi-shims";
+import { wasi } from "@deltic/wasi";
 import { websocketImports } from "../../js/deltic/websocket.ts";
 
 // This file sits at examples/deltic-demo/run.ts, so the repo root is two
@@ -113,7 +113,7 @@ async function main() {
   console.error(`echo server ready at ${echod.base}`);
   try {
     const instance = await instantiate(artifacts, {
-      ...wasiShims(),
+      ...wasi(),
       ...websocketImports(),
     });
     const demo = instance.exports[DEMO_INTERFACE] as {
@@ -121,12 +121,12 @@ async function main() {
     };
     // The export's `result<u32, string>` lifts to return-or-throw in
     // return position (contracts/embedder-api.md §"Value mapping"): the
-    // err payload rides a branded `WitError`.
+    // err payload rides a branded `ComponentException`.
     try {
       const received = await demo.run(`${echod.base}/echo`, cli.count);
       console.log(`round-tripped ${received}/${cli.count} messages`);
     } catch (err) {
-      const detail = isWitError(err) ? err.payload : err;
+      const detail = isComponentException(err) ? err.payload : err;
       console.error(`demo failed: ${detail}`);
       Deno.exitCode = 1;
     }

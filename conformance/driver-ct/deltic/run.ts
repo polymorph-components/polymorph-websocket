@@ -10,7 +10,7 @@
 //   `connections.setMaxInboundBufferBytes(…)`  | `configure({ … })`, same values
 //   `spawnEchod(bin)` scraping LISTENING       | `spawnEchod()`, same scrape
 //   `unreachableUrl()` (bind port 0, release)  | same
-//   `env = [[WS_CONFORMANCE_*, …]]`            | `wasiShims({ cli: { env } })`
+//   `env = [[WS_CONFORMANCE_*, …]]`            | `wasi({ cli: { env } })`
 //   `runSuite(...)` (component-test-js)        | `runSuite(...)` (ct-runner)
 //   `NODE_EXTRA_CA_CERTS=…/tls/ca.pem`         | `DENO_CERT=…/tls/ca.pem`
 //
@@ -27,7 +27,7 @@
 // excluded: the TLS leg runs headlessly under Deno exactly as the ws:
 // leg does.
 //
-// MODULE-IDENTITY CONSTRAINT: deltic's wasi-shims module imports
+// MODULE-IDENTITY CONSTRAINT: deltic's wasi module imports
 // `@deltic/runtime/embedder` by bare specifier internally; this leg's
 // `deno.json` AND `js/deltic/deno.json` must map that specifier to the
 // IDENTICAL exact-pinned JSR version, or the embedder module loads twice
@@ -48,7 +48,7 @@ import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
 import { defaultTranslator } from "@deltic/translator";
 import { runSuite } from "@deltic/ct-runner";
-import { wasiShims } from "@deltic/wasi-shims";
+import { wasi } from "@deltic/wasi";
 import { configure, websocketImports } from "../../../js/deltic/websocket.ts";
 
 // This file sits at conformance/driver-ct/deltic/run.ts, so the repo
@@ -218,7 +218,7 @@ async function main() {
 
   const artifacts = await loadArtifacts(cli.translator);
   const imports = {
-    ...wasiShims({ cli: { env, passthrough: false } }),
+    ...wasi({ cli: { env, passthrough: false } }),
     ...websocketImports(),
   };
 

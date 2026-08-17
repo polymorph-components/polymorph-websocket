@@ -69,17 +69,43 @@ test:
 deltic-module-check:
     cd js/deltic && deno task check && deno task test
 
-# The one-version-everywhere gate: every `jsr:@deltic/*` import across
-# BOTH deno.json files that carry deltic imports must agree on the exact
-# same pinned version (the retired release-asset pin gate, generalized to
-# every package, not just the runtime/embedder URL).
+# The one-version-everywhere gate: every `jsr:@deltic/*` package resolved
+# in BOTH deno.locks (js/deltic and conformance/driver-ct/deltic) must
+# agree on the exact same resolved version, or the embedder module can
+# load twice across the module boundary (see js/deltic/deno.json's
+# MODULE-IDENTITY comment). js/deltic's manifest takes a caret range
+# (required for publishing to JSR) so the *lock*, not the manifest, is
+# the source of truth for the resolved version. @deltic/protocol is
+# excluded: it versions independently of the runtime/wasi/translator
+# family it's a transitive dependency of.
 exam-deltic:
     #!/usr/bin/env bash
     set -euo pipefail
-    v=$(grep -ho 'jsr:@deltic/[a-z-]*@[^/"]*' js/deltic/deno.json conformance/driver-ct/deltic/deno.json \
-        | sed 's/.*@//' | sort -u)
+    v=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@deltic/(?!protocol)")) | .value' \
+        js/deltic/deno.lock conformance/driver-ct/deltic/deno.lock | sort -u)
     if [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
         echo "deltic pin drift: $v" >&2
         exit 1
     fi
     echo "deltic pin: $v"
+
+# The JS runner core's one-version gate: the deltic-browser driver's
+# npm tree (@jsr/polymorph__test, JSR's npm-compat form of
+# jsr:@polymorph/test, routed through the tree's own .npmrc) and its
+# deno.lock (which locks the same package under its bare jsr: name for
+# the bundled worker import) must resolve the same version — a skewed
+# bump runs the JS harness against a Rust runner from a different
+# polymorph-test release. Wired next to exam-deltic in CI.
+runner-js-pin-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    v=$({ grep -A1 "'@jsr/polymorph__test':" \
+            conformance/driver-ct/deltic/pnpm-lock.yaml \
+        | sed -n "s/.*specifier: *//p"; \
+        jq -r '.jsr | keys[]' conformance/driver-ct/deltic/deno.lock \
+        | grep '^@polymorph/test@' | sed 's/.*@//'; } | sort -u)
+    if [ -z "$v" ] || [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
+        echo "runner-js pin drift: $v" >&2
+        exit 1
+    fi
+    echo "runner-js pin OK: @jsr/polymorph__test $v"

@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Node driver + bundled worker inputs for the deltic-browser conformance row: the suite runtime-linked inside headless Chromium with this repo's deltic host module, through the upstream page driver and deltic worker-main.",
   "dependencies": {
-    "@polymorph/component-test-js": "github:polymorph-components/polymorph-test#3ec431717895b2e4fa81500794e0da7fd13e26e7",
+    "@jsr/polymorph__test": "0.1.1",
     "playwright-core": "^1.61.1"
   }
 }

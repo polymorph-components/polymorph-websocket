@@ -24,6 +24,14 @@ holds them to one behavior. Open questions and findings are tracked in the
 
 [`tokio-tungstenite`]: https://github.com/snapview/tokio-tungstenite
 
+## Releases
+
+Everything here is **unstable** (0.x), but [releases](../../releases) are
+**caret-honest**: within a minor line they stay backward-compatible, and
+anything breaking bumps the minor. Consumption is pinned at a release's
+commit — cargo git dependencies, vendored WIT, the release-pinned
+deltic/JSR graph — and bumped deliberately.
+
 ## Why this exists
 
 WebAssembly components have no standard WebSocket path today: `wasi:http`
@@ -47,7 +55,7 @@ in-guest.
 | Path | Deliverable |
 | --- | --- |
 | [`wit/`](wit) | The `polymorph:websocket` package: a `types` interface for structural types and a `connections` interface owning the `websocket` resource. One copy at the root; consumers pull it in via `wit/deps` symlinks. Package-wide contracts live in [`wit/README.md`](wit/README.md). |
-| [`js/deltic`](js/deltic) | The **browser-first JS host module** (`websocket.ts`): the standard `WebSocket` API only, no `node:` modules, no runtime dependencies, over [deltic](https://github.com/lann/deltic)'s embedder conventions (typed streams, `WitError`). Shared verbatim by the demo runner, the conformance JS-host rows, and the WPT parity round trip. |
+| [`js/deltic`](js/deltic) | The **browser-first JS host module** (`websocket.ts`): the standard `WebSocket` API only, no `node:` modules, no runtime dependencies, over [deltic](https://github.com/lann/deltic)'s embedder conventions (typed streams, `ComponentException`). Shared verbatim by the demo runner, the conformance JS-host rows, and the WPT parity round trip. |
 | [`rust/wasmtime`](rust/wasmtime) | The **Wasmtime host crate** (`wasmtime-websocket`): `add_to_linker` + `WasiWebsocketView`, per-store `WasiWebsocketCtx` knobs for the bounds the WIT leaves implementation-defined. |
 | [`js/componentize`](js/componentize) | The **browser-API shim** for componentize-js guests: the WHATWG `WebSocket` interface implemented over the WIT imports — the inverse of `js/deltic` — plus the **WPT parity gate**: vendored web-platform-tests run round-trip (shim → WIT → deltic → platform WebSocket) and held to the platform baseline's pass set. |
 | [`rust/guest-provider`](rust/guest-provider) | The **in-guest provider** (`websocket-guest-provider`): a WebSocket client stack over `wasi:sockets` TCP, exporting the package surface as a composable component; `wss:` via the composed [`polymorph:tls`](https://github.com/polymorph-components/polymorph-tls) component. See its README for the TLS posture and configuration channel. |

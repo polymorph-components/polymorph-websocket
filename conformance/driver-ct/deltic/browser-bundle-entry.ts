@@ -9,10 +9,10 @@
 // map — the single deltic pin site), the emitted module is what
 // browser/worker-entry.ts imports as `@deltic/release-bundle-entry`
 // used to. Same export surface: instantiate/Translator/runSuite/
-// wasiShims/WitError/artifactsFromEnvelope and friends (49 exports
+// wasi/ComponentException/artifactsFromEnvelope and friends (49 exports
 // verified against the retired upstream entry).
 export * from "@deltic/runtime/embedder";
 export { Translator } from "@deltic/runtime/shim";
 export * from "@deltic/ct-runner";
-export { wasiShims } from "@deltic/wasi-shims";
-export type { WasiShims, WasiShimsOptions } from "@deltic/wasi-shims";
+export { wasi } from "@deltic/wasi";
+export type { WasiImports, WasiOptions } from "@deltic/wasi";

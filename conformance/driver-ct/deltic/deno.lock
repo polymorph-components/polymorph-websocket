@@ -1,59 +1,58 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@deltic/ct-runner@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
-    "jsr:@deltic/protocol@0.1": "0.1.0",
-    "jsr:@deltic/runtime@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
-    "jsr:@deltic/runtime@~0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
-    "jsr:@deltic/translator@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
-    "jsr:@deltic/wasi-shims@0.1.0-pre.g50778a1": "0.1.0-pre.g50778a1",
-    "npm:playwright-core@^1.61.1": "1.62.1"
+    "jsr:@deltic/ct-runner@0.1.0": "0.1.0",
+    "jsr:@deltic/protocol@0.2": "0.2.0",
+    "jsr:@deltic/runtime@0.1": "0.1.0",
+    "jsr:@deltic/runtime@0.1.0": "0.1.0",
+    "jsr:@deltic/translator@0.1.0": "0.1.0",
+    "jsr:@deltic/wasi@0.1.0": "0.1.0",
+    "jsr:@polymorph/test@0.1.1": "0.1.1"
   },
   "jsr": {
-    "@deltic/ct-runner@0.1.0-pre.g50778a1": {
-      "integrity": "312e40aebc95411d1dbf12f74f5465c621007e1bb38815e9be56933b58a2fdcd",
+    "@deltic/ct-runner@0.1.0": {
+      "integrity": "cf642f22675d6733b6d13117cebdd2de95135884d2a1231764a3f7a4e3314982",
       "dependencies": [
-        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
+        "jsr:@deltic/runtime@0.1"
       ]
     },
-    "@deltic/protocol@0.1.0": {
-      "integrity": "c9d0adff11eac77ce56a28db163dc22bc74427864e0034d2b9d381daea144a1b"
+    "@deltic/protocol@0.2.0": {
+      "integrity": "028be6a3623c5e910598aa7a199209b85e8931ae484ac7f6638d610ddb0e19fa"
     },
-    "@deltic/runtime@0.1.0-pre.g50778a1": {
-      "integrity": "e2e17d3be84cadadfcf5de3284f23c06172e1ed6d5c38dfb7bdcdb878050e10e",
+    "@deltic/runtime@0.1.0": {
+      "integrity": "8d3f52f1a336a2dd9aed28a5c34fd281612a2f55a1582b159be614dd678593b3",
       "dependencies": [
         "jsr:@deltic/protocol"
       ]
     },
-    "@deltic/translator@0.1.0-pre.g50778a1": {
-      "integrity": "4d95ca60719300b482cf90c147a8b33cf92550d408bf0a5718fbd6483887510a",
+    "@deltic/translator@0.1.0": {
+      "integrity": "c447f27a90d7637dd3d5709f3f25378ded0f4b985bedc890c3f6a8cb9ff1eb9f",
       "dependencies": [
-        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
+        "jsr:@deltic/runtime@0.1"
       ]
     },
-    "@deltic/wasi-shims@0.1.0-pre.g50778a1": {
-      "integrity": "e1a3fe2da0ba7d9c4c632e905c9dbdcd50c1a3da9eaadaecf86d54add39d0446",
+    "@deltic/wasi@0.1.0": {
+      "integrity": "c35a19d139d684dafeca8ba200230a3eb1154627c80db298ae1393e3af938d68",
       "dependencies": [
         "jsr:@deltic/protocol",
-        "jsr:@deltic/runtime@~0.1.0-pre.g50778a1"
+        "jsr:@deltic/runtime@0.1"
       ]
-    }
-  },
-  "npm": {
-    "playwright-core@1.62.1": {
-      "integrity": "sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==",
-      "bin": true
+    },
+    "@polymorph/test@0.1.1": {
+      "integrity": "50ce81310c97591c523bbfdbe74e18a806e709ae1c09f47297da98267b5be8b3"
     }
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deltic/ct-runner@0.1.0-pre.g50778a1",
-      "jsr:@deltic/runtime@0.1.0-pre.g50778a1",
-      "jsr:@deltic/translator@0.1.0-pre.g50778a1",
-      "jsr:@deltic/wasi-shims@0.1.0-pre.g50778a1"
+      "jsr:@deltic/ct-runner@0.1.0",
+      "jsr:@deltic/runtime@0.1.0",
+      "jsr:@deltic/translator@0.1.0",
+      "jsr:@deltic/wasi@0.1.0",
+      "jsr:@polymorph/test@0.1.1"
     ],
     "packageJson": {
       "dependencies": [
+        "npm:@jsr/polymorph__test@0.1.1",
         "npm:playwright-core@^1.61.1"
       ]
     }

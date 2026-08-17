@@ -9,7 +9,7 @@
 // consumer's own conformance suite, executed by conformance/run.ts.
 
 import { assert, assertEquals, assertRejects, assertThrows } from "jsr:@std/assert@^1.0.0";
-import { WitError } from "@deltic/runtime/embedder";
+import { ComponentException } from "@deltic/runtime/embedder";
 import {
   currentConfig,
   resetConfig,
@@ -22,19 +22,19 @@ import {
 } from "../websocket.ts";
 import { burstPayload, startEchoServer, type TestServer } from "./echo_server.ts";
 
-/** Assert `fn` throws a branded `WitError` whose payload tag is `tag`. */
-function assertWitTag(fn: () => unknown, tag: WebsocketError["tag"]): WebsocketError {
-  const e = assertThrows(fn, WitError) as WitError<WebsocketError>;
-  assertEquals(e.payload.tag, tag);
+/** Assert `fn` throws a branded `ComponentException` whose payload kind is `kind`. */
+function assertComponentKind(fn: () => unknown, kind: WebsocketError["kind"]): WebsocketError {
+  const e = assertThrows(fn, ComponentException) as ComponentException<WebsocketError>;
+  assertEquals(e.payload.kind, kind);
   return e.payload;
 }
 
-async function assertRejectsWitTag(
+async function assertRejectsComponentKind(
   fn: () => Promise<unknown>,
-  tag: WebsocketError["tag"],
+  kind: WebsocketError["kind"],
 ): Promise<WebsocketError> {
-  const e = await assertRejects(fn, WitError) as WitError<WebsocketError>;
-  assertEquals(e.payload.tag, tag);
+  const e = await assertRejects(fn, ComponentException) as ComponentException<WebsocketError>;
+  assertEquals(e.payload.kind, kind);
   return e.payload;
 }
 
@@ -55,15 +55,15 @@ Deno.test("connect + echo: text and binary round-trip, kinds preserved", async (
     assertEquals(ws.protocol(), "");
     assertEquals(ws.state(), "open");
 
-    await ws.send({ tag: "string", val: "héllo — 你好 🦀" });
+    await ws.send({ kind: "string", value: "héllo — 你好 🦀" });
     const text = await ws.receive();
-    assertEquals(text, { tag: "string", val: "héllo — 你好 🦀" });
+    assertEquals(text, { kind: "string", value: "héllo — 你好 🦀" });
 
     const payload = new Uint8Array([0, 1, 2, 253, 254, 255]);
-    await ws.send({ tag: "binary", val: payload });
+    await ws.send({ kind: "binary", value: payload });
     const bin = await ws.receive();
-    assertEquals(bin.tag, "binary");
-    assertEquals(bin.val as Uint8Array, payload);
+    assertEquals(bin.kind, "binary");
+    assertEquals(bin.value as Uint8Array, payload);
 
     ws.close(1000, "bye");
     const info = await ws.waitClosed();
@@ -88,7 +88,7 @@ Deno.test("subprotocol: offered but none selected fails connect-failed", async (
   await withServer(async (s) => {
     // The WIT binds the server: "the connection fails if the server ...
     // selects none at all" (wit/websocket.wit:181-185).
-    await assertRejectsWitTag(
+    await assertRejectsComponentKind(
       () => Websocket.connect(`${s.base}/echo`, ["alpha"]),
       "connect-failed",
     );
@@ -98,7 +98,7 @@ Deno.test("subprotocol: offered but none selected fails connect-failed", async (
 Deno.test("subprotocol: a malformed offer fails invalid-argument, eagerly", async () => {
   await withServer(async (s) => {
     for (const protocols of [["dup", "dup"], ["has space"], [""], ["bad,comma"]]) {
-      await assertRejectsWitTag(
+      await assertRejectsComponentKind(
         () => Websocket.connect(`${s.base}/echo`, protocols),
         "invalid-argument",
       );
@@ -118,7 +118,7 @@ Deno.test("connect: invalid URLs fail invalid-url, eagerly", async () => {
         "/echo",
       ]
     ) {
-      await assertRejectsWitTag(() => Websocket.connect(url, []), "invalid-url");
+      await assertRejectsComponentKind(() => Websocket.connect(url, []), "invalid-url");
     }
   });
 });
@@ -127,19 +127,19 @@ Deno.test("close: argument validation is eager and leaves the connection usable"
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
     for (const code of [0, 999, 1001, 1005, 1006, 1015, 2999, 5000, 65535]) {
-      assertWitTag(() => ws.close(code, ""), "invalid-argument");
+      assertComponentKind(() => ws.close(code, ""), "invalid-argument");
     }
     // A reason needs a code; 124 bytes is one too many; 123 is exact.
-    assertWitTag(() => ws.close(undefined, "reason"), "invalid-argument");
-    assertWitTag(() => ws.close(1000, "r".repeat(124)), "invalid-argument");
+    assertComponentKind(() => ws.close(undefined, "reason"), "invalid-argument");
+    assertComponentKind(() => ws.close(1000, "r".repeat(124)), "invalid-argument");
     // The bound counts UTF-8 bytes, not code units: 42 three-byte chars
     // overflow, 41 fit exactly.
-    assertWitTag(() => ws.close(4000, "€".repeat(42)), "invalid-argument");
+    assertComponentKind(() => ws.close(4000, "€".repeat(42)), "invalid-argument");
 
     // A rejected close left the connection usable.
-    await ws.send({ tag: "binary", val: new Uint8Array([7, 7, 7]) });
+    await ws.send({ kind: "binary", value: new Uint8Array([7, 7, 7]) });
     const echoed = await ws.receive();
-    assertEquals(echoed.val as Uint8Array, new Uint8Array([7, 7, 7]));
+    assertEquals(echoed.value as Uint8Array, new Uint8Array([7, 7, 7]));
 
     assertEquals(ws.state(), "open");
     ws.close(4999, "€".repeat(41));
@@ -151,13 +151,13 @@ Deno.test("close: argument validation is eager and leaves the connection usable"
 Deno.test("close: local close discards the backlog and latches", async () => {
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
-    await ws.send({ tag: "binary", val: new Uint8Array([1, 2, 3]) });
+    await ws.send({ kind: "binary", value: new Uint8Array([1, 2, 3]) });
     ws.close(1000, "");
     // Idempotent: a second close is a no-op, not an error.
     ws.close(4000, "second");
-    await assertRejectsWitTag(() => ws.receive(), "closed");
-    await assertRejectsWitTag(
-      () => ws.send({ tag: "binary", val: new Uint8Array([1]) }),
+    await assertRejectsComponentKind(() => ws.receive(), "closed");
+    await assertRejectsComponentKind(
+      () => ws.send({ kind: "binary", value: new Uint8Array([1]) }),
       "closed",
     );
     await ws.waitClosed();
@@ -169,8 +169,8 @@ Deno.test("receive-via-stream: happy path delivers one stream-message per messag
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
     const sent = [
-      { tag: "binary", val: new Uint8Array([9, 8, 7, 6]) } as const,
-      { tag: "string", val: "streamed téxt ✓" } as const,
+      { kind: "binary", value: new Uint8Array([9, 8, 7, 6]) } as const,
+      { kind: "string", value: "streamed téxt ✓" } as const,
     ];
     for (const m of sent) await ws.send(m);
 
@@ -204,9 +204,9 @@ Deno.test("receive-via-stream: single-use; pending receive is rejected", async (
     // with `receiving-via-stream` (wit/websocket.wit:239-243).
     const pending = ws.receive();
     const stream = ws.receiveViaStream();
-    await assertRejectsWitTag(() => pending, "receiving-via-stream");
-    assertWitTag(() => ws.receiveViaStream(), "receiving-via-stream");
-    await assertRejectsWitTag(() => ws.receive(), "receiving-via-stream");
+    await assertRejectsComponentKind(() => pending, "receiving-via-stream");
+    assertComponentKind(() => ws.receiveViaStream(), "receiving-via-stream");
+    await assertRejectsComponentKind(() => ws.receive(), "receiving-via-stream");
     await stream.cancel();
     ws.close(1000, "");
     await ws.waitClosed();
@@ -218,29 +218,30 @@ Deno.test("receive-via-stream: single-use; pending receive is rejected", async (
 // own tests): per the protocol contract, an object carrying the brand is a
 // legal value from ANY runtime copy, so these prove the module's
 // recognition sites work without class identity — the multi-copy exposure
-// #48 closes. The literal `/1` keys are deliberate: a brand-generation
-// bump upstream must fail here and force the recognition sites to be
-// revisited.
+// #48 closes. The literal keys are deliberate: a brand-generation bump
+// upstream must fail here and force the recognition sites to be
+// revisited. (Key spellings are stable across upstream renames: the
+// `ComponentException` brand is still `deltic.witError/1`.)
 
-Deno.test("send-via-stream: a foreign-copy WitError's payload passes through the error wrap", async () => {
+Deno.test("send-via-stream: a foreign-copy ComponentException's payload passes through the error wrap", async () => {
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
     const foreign = Object.assign(new Error("minted elsewhere"), {
       [Symbol.for("deltic.witError/1")]: true,
-      payload: { tag: "invalid-argument", val: "minted by another copy" },
+      payload: { kind: "invalid-argument", value: "minted by another copy" },
     });
     const producer = (async function* () {
       throw foreign;
     })();
     const e = await assertRejects(
       () => ws.sendViaStream(producer as unknown as Parameters<Websocket["sendViaStream"]>[0]),
-      WitError,
-    ) as WitError<SendViaStreamError>;
+      ComponentException,
+    ) as ComponentException<SendViaStreamError>;
     // The structured payload must pass through, not be flattened to
-    // `{ tag: "other", val: String(error) }` as an unrecognized throw is.
+    // `{ kind: "other", value: String(error) }` as an unrecognized throw is.
     assertEquals(e.payload.error, {
-      tag: "invalid-argument",
-      val: "minted by another copy",
+      kind: "invalid-argument",
+      value: "minted by another copy",
     } as WebsocketError);
     assertEquals(e.payload.sent, 0n);
     ws.close(1000, "");
@@ -269,7 +270,7 @@ Deno.test("send-via-stream: a hand-rolled branded byte stream takes the batched-
     })();
     await ws.sendViaStream(producer as unknown as Parameters<Websocket["sendViaStream"]>[0]);
     const echoed = await ws.receive();
-    assertEquals(echoed, { tag: "binary", val: payload });
+    assertEquals(echoed, { kind: "binary", value: payload });
     ws.close(1000, "");
     await ws.waitClosed();
   });
@@ -293,10 +294,10 @@ Deno.test("flow control: overflow closes, backlog stays receivable, then overflo
       try {
         message = await ws.receive();
       } catch (e) {
-        assertEquals((e as WitError<WebsocketError>).payload.tag, "receive-buffer-overflow");
+        assertEquals((e as ComponentException<WebsocketError>).payload.kind, "receive-buffer-overflow");
         break;
       }
-      assertEquals(message.val as Uint8Array, burstPayload(drained, 1024));
+      assertEquals(message.value as Uint8Array, burstPayload(drained, 1024));
       drained += 1;
       assert(drained <= floodCount, "received more messages than were sent");
     }
@@ -311,7 +312,7 @@ Deno.test("flow control: a message larger than the whole bound overflows immedia
     const ws = await Websocket.connect(`${s.base}/burst?count=1&size=8192`, []);
     // Nothing precedes it in the backlog: the very first receive observes
     // the overflow (wit/websocket.wit:165-169).
-    await assertRejectsWitTag(() => ws.receive(), "receive-buffer-overflow");
+    await assertRejectsComponentKind(() => ws.receive(), "receive-buffer-overflow");
   });
 });
 
@@ -319,13 +320,13 @@ Deno.test("connect: the handshake bound fires as connect-failed", async () => {
   await withServer(async (s) => {
     setConnectTimeoutMs(250);
     const started = performance.now();
-    const payload = await assertRejectsWitTag(
+    const payload = await assertRejectsComponentKind(
       () => Websocket.connect(`${s.base}/stall`, []),
       "connect-failed",
     );
     const elapsed = performance.now() - started;
     assert(elapsed < 5_000, `connect bound did not fire promptly (${elapsed}ms)`);
-    assert("val" in payload && typeof payload.val === "string");
+    assert("value" in payload && typeof payload.value === "string");
   });
 });
 

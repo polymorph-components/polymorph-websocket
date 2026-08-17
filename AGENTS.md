@@ -31,7 +31,7 @@ Layout (each directory's justfile module in parentheses):
 - `js/deltic/` (`just deltic-module-check`) — `websocket.ts`, THE
   browser-first JS host module, over
   [deltic](https://github.com/lann/deltic)'s embedder conventions (typed
-  streams, `WitError`) for its runtime-linked, no-transpile legs
+  streams, `ComponentException`) for its runtime-linked, no-transpile legs
   (`conformance/driver-ct/deltic/`, the WPT parity round trip, the demo).
   Its knobs are exported functions (`configure`,
   `setMaxInboundBufferBytes`, `setConnectTimeoutMs`, `setCloseTimeoutMs`);
@@ -61,11 +61,12 @@ Layout (each directory's justfile module in parentheses):
   `server/echod.mjs` the shared Node spawn helpers). The suite crates
   consume the harness as rev-pinned git dependencies (the two
   `[workspace.dependencies]` entries in the root `Cargo.toml`), the
-  deltic-browser driver consumes its JS runner core as a git dep
-  (`@polymorph/component-test-js` in `driver-ct/deltic/package.json`), and
+  deltic-browser driver consumes its JS runner core from JSR
+  (`@jsr/polymorph__test` in `driver-ct/deltic/package.json`), and
   the `component-test` CLI is cargo-installed at the rev Cargo.lock
-  records (`conformance-ct::_ct-tools`). One rev everywhere; the root
-  `Cargo.toml` comment is the bump checklist. There is no transpiler
+  records (`conformance-ct::_ct-tools`). Both sides of a bump name one
+  polymorph-test release; the root `Cargo.toml` comment is the bump
+  checklist. There is no transpiler
   dependency anywhere: the JS host legs are runtime-linked by the pinned
   deltic JSR prereleases (single pin site: `driver-ct/deltic/{deno.json,
   deno.lock}`).

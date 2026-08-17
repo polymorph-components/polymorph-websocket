@@ -7,7 +7,7 @@ Chromium). It began as the [deltic](https://github.com/lann/deltic)-native
 port of the browser-first reference host `js/jco/websocket.js` (retired
 with the jco legs at commit c9252be; see git history), rewritten over
 deltic's embedder API (typed `Stream<T>` / `ReadableStream` rather than
-bare-payload `Stream`, and `WitError` throws rather than
+bare-payload `Stream`, and `ComponentException` throws rather than
 `throw { tag, val }`). It was developed as deltic's own
 `ports/websocket` reference-host port and is upstreamed here per
 [lann/deltic#14](https://github.com/lann/deltic/issues/14); the WIT
@@ -37,8 +37,8 @@ pinned URL as `conformance/driver-ct/deltic/deno.json`. deltic's
 `wasi-shims` module imports that specifier by bare name internally; if the
 two configs ever disagreed, the embedder module would load twice. This
 module recognizes deltic values by `@deltic/protocol` brand predicates
-(`isWitError`, the `STREAM` brand), so recognition holds even in a
-multi-copy graph — but a duplicated embedder still splits the
+(`isComponentException`, the `STREAM` brand), so recognition holds even in
+a multi-copy graph — but a duplicated embedder still splits the
 runtime/translator plan-format pairing, and stateful handles
 (streams/futures) minted by one copy are refused by the other. Keep both
 import maps byte-identical for that one entry.
