@@ -32,8 +32,8 @@ default-members = [
 # .github/workflows/ci.yml`, then `cargo update component-test-sdk
 # component-test-runner` and `pnpm --dir conformance/driver-ct/deltic
 # install`; the _ct-tools pins gate and the CI ref guard fail on skew.
-component-test-sdk = { git = "https://github.com/polymorph-components/polymorph-test", rev = "3ec431717895b2e4fa81500794e0da7fd13e26e7" }
-component-test-runner = { git = "https://github.com/polymorph-components/polymorph-test", rev = "3ec431717895b2e4fa81500794e0da7fd13e26e7" }
+component-test-sdk = { git = "https://github.com/polymorph-components/polymorph-test", rev = "b4444a25a22106ad4128549bdc9e579552e62210" }
+component-test-runner = { git = "https://github.com/polymorph-components/polymorph-test", rev = "b4444a25a22106ad4128549bdc9e579552e62210" }
 anyhow = "1"
 bytes = "1"
 futures = "0.3"

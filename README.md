@@ -24,6 +24,14 @@ holds them to one behavior. Open questions and findings are tracked in the
 
 [`tokio-tungstenite`]: https://github.com/snapview/tokio-tungstenite
 
+## Releases
+
+Everything here is **unstable** (0.x), but [releases](../../releases) are
+**caret-honest**: within a minor line they stay backward-compatible, and
+anything breaking bumps the minor. Consumption is pinned at a release's
+commit — cargo git dependencies, vendored WIT, the release-pinned
+deltic/JSR graph — and bumped deliberately.
+
 ## Why this exists
 
 WebAssembly components have no standard WebSocket path today: `wasi:http`

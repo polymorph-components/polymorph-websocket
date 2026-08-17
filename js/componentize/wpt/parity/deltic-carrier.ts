@@ -19,7 +19,7 @@
 // legs.mjs must not import `../reporter.js` itself.
 //
 // THE DELTIC PIN IS SINGLE-SITE: this module resolves `@deltic/*` through
-// conformance/driver-ct/deltic/deno.json (exact-pinned JSR prereleases;
+// conformance/driver-ct/deltic/deno.json (exact-pinned JSR releases;
 // the bundle recipe runs `deno bundle` from that directory) and the
 // translator asset is extracted from the packaged `@deltic/translator`
 // JSR package's lock-pinned module cache (no fetch step). Bundling from
@@ -29,7 +29,7 @@
 
 import { Translator } from "@deltic/runtime/shim";
 import { instantiate } from "@deltic/runtime/embedder";
-import { wasiShims } from "@deltic/wasi-shims";
+import { wasi } from "@deltic/wasi";
 import { websocketImports } from "../../../deltic/websocket.ts";
 import { reporter, setSink } from "../reporter.js";
 import { socketsStubs } from "./sockets-stub-deltic.mjs";
@@ -60,7 +60,7 @@ export async function instantiateRunner(
   const translator = await Translator.create(translatorBytes);
   const { plan, adapters } = translator.translate(componentBytes);
   const instance = await instantiate({ plan, componentBytes, adapters }, {
-    ...wasiShims(),
+    ...wasi(),
     ...socketsStubs(),
     // The host module under test: the same import-record assembly the
     // conformance leg uses (conformance/driver-ct/deltic/run.ts).

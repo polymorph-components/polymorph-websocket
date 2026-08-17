@@ -24,7 +24,7 @@ import { Translator } from "@deltic/runtime/shim";
 import type { ComponentArtifacts } from "@deltic/runtime/embedder";
 import { ComponentException, instantiate } from "@deltic/runtime/embedder";
 import { defaultTranslator } from "@deltic/translator";
-import { wasiShims } from "@deltic/wasi-shims";
+import { wasi } from "@deltic/wasi";
 import { websocketImports } from "../../js/deltic/websocket.ts";
 
 // This file sits at examples/deltic-demo/run.ts, so the repo root is two
@@ -113,7 +113,7 @@ async function main() {
   console.error(`echo server ready at ${echod.base}`);
   try {
     const instance = await instantiate(artifacts, {
-      ...wasiShims(),
+      ...wasi(),
       ...websocketImports(),
     });
     const demo = instance.exports[DEMO_INTERFACE] as {
