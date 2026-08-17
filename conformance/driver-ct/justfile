@@ -33,11 +33,11 @@ build-driver:
 # of truth; same-rev reruns are a no-op "already installed"). The
 # bootstrap extraction anchors on the crate name, not the repository
 # URL (URLs change on renames): the sdk's [[package]] block in
-# Cargo.lock carries the git source to install from. The pins gate then
-# asserts one rev everywhere — a skewed bump runs the JS harness
-# against a Rust runner from a different rev. The deltic browser driver's
-# lockfile is the only JS pin site left: the WPT parity tree stopped
-# consuming the runner core when its jco carrier retired.
+# Cargo.lock carries the git source to install from. The JS runner
+# core arrives from JSR (@jsr/polymorph__test npm alias); its
+# one-version gate is the root justfile's runner-js-pin-check, and the
+# version<->rev pairing is the bump procedure's job (see the root
+# Cargo.toml's bump comment).
 _ct-tools:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -50,7 +50,6 @@ _ct-tools:
         printf '%s' "$rev" > target/ct-tools/.rev
     fi
     target/ct-tools/bin/component-test pins --cargo-lock Cargo.lock \
-        --js-lock conformance/driver-ct/deltic/pnpm-lock.yaml \
         --expect "$rev" > /dev/null
 
 build-echod:

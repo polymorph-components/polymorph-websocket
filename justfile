@@ -88,3 +88,24 @@ exam-deltic:
         exit 1
     fi
     echo "deltic pin: $v"
+
+# The JS runner core's one-version gate: the deltic-browser driver's
+# npm tree (@jsr/polymorph__test, JSR's npm-compat form of
+# jsr:@polymorph/test, routed through the tree's own .npmrc) and its
+# deno.lock (which locks the same package under its bare jsr: name for
+# the bundled worker import) must resolve the same version — a skewed
+# bump runs the JS harness against a Rust runner from a different
+# polymorph-test release. Wired next to exam-deltic in CI.
+runner-js-pin-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    v=$({ grep -A1 "'@jsr/polymorph__test':" \
+            conformance/driver-ct/deltic/pnpm-lock.yaml \
+        | sed -n "s/.*specifier: *//p"; \
+        jq -r '.jsr | keys[]' conformance/driver-ct/deltic/deno.lock \
+        | grep '^@polymorph/test@' | sed 's/.*@//'; } | sort -u)
+    if [ -z "$v" ] || [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
+        echo "runner-js pin drift: $v" >&2
+        exit 1
+    fi
+    echo "runner-js pin OK: @jsr/polymorph__test $v"

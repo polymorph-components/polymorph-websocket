@@ -5,7 +5,7 @@
 // emitted bundle carries exactly one embedder module instance — which is
 // what keeps `instanceof ComponentException` true when the host module throws
 // across the component boundary (workers resolve no import maps, so
-// bundling is the only sound shape; see @polymorph/component-test-js's
+// bundling is the only sound shape; see @jsr/polymorph__test's
 // runner-deltic README).
 //
 // Built by `just conformance-ct::run-deltic-browser` with
@@ -13,7 +13,7 @@
 // served to the page from there as runSuitesInPage's workerUrl.
 
 import * as deltic from "../browser-bundle-entry.ts";
-import { workerMain } from "@polymorph/component-test-js/deltic-worker-main";
+import { workerMain } from "@polymorph/test/deltic-worker-main";
 import { configure, websocketImports } from "../../../../js/deltic/websocket.ts";
 
 // The suite bounds, matching every other leg (run-node.mjs, run.ts, the
