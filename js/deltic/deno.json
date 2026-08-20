@@ -1,11 +1,11 @@
 {
   "name": "@polymorph/websocket",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "exports": "./websocket.ts",
   "//": "MODULE-IDENTITY CONSTRAINT: deltic's wasi module imports @deltic/runtime/embedder by bare specifier internally. This file's @deltic/runtime range and conformance/driver-ct/deltic/deno.json's exact pin must resolve to the IDENTICAL @deltic/runtime version in both deno.locks, or the embedder module loads twice: value recognition survives that (websocket.ts recognizes deltic values by @deltic/protocol brand predicates, not instanceof), but a second copy splits the runtime/translator plan-format pairing, and stateful handles (streams/futures) minted by one copy are refused by the other. Pin story: this published package takes a caret range (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor); the repo-internal conformance harness exact-pins instead so its lock is the single source of truth for the resolved version; deno.lock carries integrity, --frozen enforced everywhere; one RESOLVED version repo-wide (across both locks) is asserted by the pin gate (justfile: exam-deltic).",
   "imports": {
-    "@deltic/runtime/embedder": "jsr:@deltic/runtime@^0.1.0/embedder"
+    "@deltic/runtime/embedder": "jsr:@deltic/runtime@^0.2.0/embedder"
   },
   "minimumDependencyAge": { "age": "P1D", "exclude": ["jsr:@deltic/*"] },
   "compilerOptions": {
