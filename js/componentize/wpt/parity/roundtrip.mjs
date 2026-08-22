@@ -1,9 +1,9 @@
 // The round-trip leg's Node driver: spawn the suite echo server, run the
-// shared leg body (legs.mjs) through the deltic carrier bundle
-// (build/deltic-carrier.mjs — see deltic-carrier.ts), and emit the
+// shared leg body (legs.mjs) through the polyengine carrier bundle
+// (build/polyengine-carrier.mjs — see polyengine-carrier.ts), and emit the
 // records as JSON on stdout, matching baseline.mjs.
 //
-// No transpile step and no engine flag: deltic runtime-links the runner
+// No transpile step and no engine flag: polyengine runtime-links the runner
 // component on the callback ABI.
 
 import { readFile } from "node:fs/promises";
@@ -17,8 +17,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
 
 const carrier = {
-  url: pathToFileURL(join(HERE, "build", "deltic-carrier.mjs")).href,
-  translatorPath: "target/deltic-browser/deltic-translator-shim.wasm",
+  url: pathToFileURL(join(HERE, "build", "polyengine-carrier.mjs")).href,
+  translatorPath: "target/polyengine-browser/polyengine-translator-shim.wasm",
   componentPath: "js/componentize/wpt/build/parity-runner.component.wasm",
   async loadBytes(path) {
     return new Uint8Array(await readFile(join(REPO_ROOT, path)));

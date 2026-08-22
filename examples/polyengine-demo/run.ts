@@ -1,6 +1,6 @@
 // Deno runner for the echo-demo component: the guest is **runtime-linked**
-// under deltic against this repo's deltic host module
-// (js/deltic/websocket.ts over Deno's native `WebSocket`) and driven
+// under polyengine against this repo's polyengine host module
+// (js/polyengine/websocket.ts over Deno's native `WebSocket`) and driven
 // against a spawned suite echo server. No transpile step, no generated
 // tree, no engine flag — the WIT contract's async exports run on the
 // callback ABI.
@@ -9,25 +9,25 @@
 // with the jco legs; see git history), which transpiled the same
 // component and drove the same `demo.run(url, count)` export.
 //
-//   just demo::deltic [count]
+//   just demo::polyengine [count]
 //   … run.ts [--translator <shim.wasm>] [count]
 //
-// The deltic pin is SINGLE-SITE: this runner resolves `@deltic/*` through
-// conformance/driver-ct/deltic/deno.json. The translator comes from the
-// packaged `@deltic/translator` JSR prerelease by default (no fetch
+// The polyengine pin is SINGLE-SITE: this runner resolves `@polyengine/*` through
+// conformance/driver-ct/polyengine/deno.json. The translator comes from the
+// packaged `@polyengine/translator` JSR prerelease by default (no fetch
 // step); `--translator <path>` remains as an optional override for a
 // locally-built translator shim. The same import map keeps one embedder
 // instance — one runtime/translator plan-format pairing — in the graph
 // (see that deno.json's MODULE-IDENTITY note).
 
-import { Translator } from "@deltic/runtime/shim";
-import type { ComponentArtifacts } from "@deltic/runtime/embedder";
-import { instantiate, isComponentException } from "@deltic/runtime/embedder";
-import { defaultTranslator } from "@deltic/translator";
-import { wasi } from "@deltic/wasi";
-import { websocketImports } from "../../js/deltic/websocket.ts";
+import { Translator } from "@polyengine/runtime/shim";
+import type { ComponentArtifacts } from "@polyengine/runtime/embedder";
+import { instantiate, isComponentException } from "@polyengine/runtime/embedder";
+import { defaultTranslator } from "@polyengine/translator";
+import { wasi } from "@polyengine/wasi";
+import { websocketImports } from "../../js/polyengine/websocket.ts";
 
-// This file sits at examples/deltic-demo/run.ts, so the repo root is two
+// This file sits at examples/polyengine-demo/run.ts, so the repo root is two
 // levels up.
 const ROOT = new URL("../../", import.meta.url);
 const ECHOD_BIN = new URL("target/debug/conformance-echod", ROOT).pathname;
@@ -59,7 +59,7 @@ function parseArgs(argv: string[]): Cli {
 }
 
 /** `spawnEchod` (conformance/server/echod.mjs), ported to Deno exactly as
- *  conformance/driver-ct/deltic/run.ts ports it: start the binary and
+ *  conformance/driver-ct/polyengine/run.ts ports it: start the binary and
  *  scrape its one `LISTENING <ws> <wss>` line. */
 async function spawnEchod(): Promise<{ base: string; shutdown: () => void }> {
   const child = new Deno.Command(ECHOD_BIN, {

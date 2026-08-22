@@ -1,0 +1,21 @@
+{
+  "name": "@polymorph/websocket",
+  "version": "0.3.0",
+  "license": "Apache-2.0",
+  "exports": "./websocket.ts",
+  "//": "MODULE-IDENTITY CONSTRAINT: polyengine's wasi module imports @polyengine/runtime/embedder by bare specifier internally. This file's @polyengine/runtime range and conformance/driver-ct/polyengine/deno.json's exact pin must resolve to the IDENTICAL @polyengine/runtime version in both deno.locks, or the embedder module loads twice: value recognition survives that (websocket.ts recognizes polyengine values by @polyengine/protocol brand predicates, not instanceof), but a second copy splits the runtime/translator plan-format pairing, and stateful handles (streams/futures) minted by one copy are refused by the other. Pin story: this published package takes a caret range (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor); the repo-internal conformance harness exact-pins instead so its lock is the single source of truth for the resolved version; deno.lock carries integrity, --frozen enforced everywhere; one RESOLVED version repo-wide (across both locks) is asserted by the pin gate (justfile: exam-polyengine).",
+  "imports": {
+    "@polyengine/runtime/embedder": "jsr:@polyengine/runtime@^0.3.0/embedder"
+  },
+  "minimumDependencyAge": { "age": "P1D", "exclude": ["jsr:@polyengine/*"] },
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
+  },
+  "tasks": {
+    "check": "deno check websocket.ts tests",
+    "test": "deno test --allow-net=127.0.0.1,localhost tests"
+  },
+  "publish": {
+    "exclude": ["tests"]
+  }
+}

@@ -31,10 +31,10 @@ rust-checks:
     @just gha::_step test
 
 conformance-checks:
-    @just gha::_step exam-deltic
+    @just gha::_step exam-polyengine
     @just gha::_step runner-js-pin-check
     @just gha::_step conformance-ct::all
-    @just gha::_step deltic-module-check
+    @just gha::_step polyengine-module-check
     @just gha::_step wpt::parity
     @just gha::_step wpt::parity-chromium
     @just gha::_step demo::test

@@ -1,5 +1,5 @@
 // Host module for `polymorph:websocket/connections@0.1.0`, ported to the
-// deltic embedder conventions (contracts/embedder-api.md).
+// polyengine embedder conventions (contracts/embedder-api.md).
 //
 // PORT PROVENANCE. This is a faithful translation of the consumer's
 // browser-first reference host, `polymorph-websocket/js/jco/websocket.js`
@@ -33,7 +33,7 @@ import {
   STREAM,
   type Stream,
   type StreamSource,
-} from "@deltic/runtime/embedder";
+} from "@polyengine/runtime/embedder";
 
 // ----- WIT value types (contracts/embedder-api.md §"Value mapping") ---------
 

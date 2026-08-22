@@ -1,6 +1,6 @@
 # Test matrix
 
-| Case | composed | deltic-browser | deltic-deno | wasmtime |
+| Case | composed | polyengine-browser | polyengine-deno | wasmtime |
 | --- | --- | --- | --- | --- |
 | websocket (55 cases) | pass | pass | pass | pass |
 
@@ -11,6 +11,6 @@ None.
 ## Summary
 
 - `composed`: 55 pass (55 total)
-- `deltic-browser`: 55 pass (55 total)
-- `deltic-deno`: 55 pass (55 total)
+- `polyengine-browser`: 55 pass (55 total)
+- `polyengine-deno`: 55 pass (55 total)
 - `wasmtime`: 55 pass (55 total)

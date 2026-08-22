@@ -1,17 +1,17 @@
 # The WPT parity gate: the vendored web-platform-tests WebSocket suites
 # run twice — directly against the platform's own WebSocket (the baseline)
-# and through the componentized shim runtime-linked by deltic against
-# js/deltic/websocket.ts (the round trip) — and the comparator holds the
+# and through the componentized shim runtime-linked by polyengine against
+# js/polyengine/websocket.ts (the round trip) — and the comparator holds the
 # round trip to the baseline's pass set, with known losses pinned in
 # parity/losses.js. Both legs end at the same platform WebSocket and the
 # same suite echo server, so the delta isolates exactly what the carrier
-# stack (shim, WIT shape, component ABI, deltic) loses. See README.md
+# stack (shim, WIT shape, component ABI, polyengine) loses. See README.md
 # (this directory) for the vendoring policy and architecture.
 #
-# The deltic pin is single-site: the carrier bundle resolves @deltic/*
-# through conformance/driver-ct/deltic/deno.json (exact-pinned JSR
+# The polyengine pin is single-site: the carrier bundle resolves @polyengine/*
+# through conformance/driver-ct/polyengine/deno.json (exact-pinned JSR
 # prereleases; see that deno.json's MODULE-IDENTITY comment) and its
-# translator asset is extracted from the packaged `@deltic/translator`
+# translator asset is extracted from the packaged `@polyengine/translator`
 # JSR package's lock-pinned module cache (no fetch step).
 
 import '../../../justfile.shared.just'
@@ -33,8 +33,8 @@ update-losses: _artifacts
     {{timeout_cmd}} node {{root}}/js/componentize/wpt/parity/run-legs.mjs --update
 
 # The same parity gate inside a headless Chromium: the baseline measures
-# Chromium's own WebSocket, the round trip runs the deltic carrier against
-# js/deltic/websocket.ts in the environment it targets. Ratchets
+# Chromium's own WebSocket, the round trip runs the polyengine carrier against
+# js/polyengine/websocket.ts in the environment it targets. Ratchets
 # separately in parity/losses-chromium.js — a loss set is a fact about one
 # engine's baseline. The browser is always
 # Playwright's pinned Chromium build (install once with
@@ -49,7 +49,7 @@ update-losses-chromium: _artifacts
     {{timeout_cmd}} node {{root}}/js/componentize/wpt/parity/run-browser.mjs --update
 
 # Componentize the pipeline smoke entry and run it under the same carrier:
-# a fast bisector for toolchain or deltic-pin bumps, asserting nothing the
+# a fast bisector for toolchain or polyengine-pin bumps, asserting nothing the
 # parity gate does not, but failing in minutes rather than suites.
 smoke: build-echod _carrier
     #!/usr/bin/env bash
@@ -72,21 +72,21 @@ _artifacts: build-echod _carrier
     cd '{{root}}'
     ./js/componentize/wpt/component.sh build
 
-# The round trip's carrier: the pinned deltic translator asset, plus the
+# The round trip's carrier: the pinned polyengine translator asset, plus the
 # one bundle that carries the engine, the host module, and the reporter
-# instance the runner's import is wired to (deltic-carrier.ts's header
+# instance the runner's import is wired to (polyengine-carrier.ts's header
 # explains why one bundle is the sound shape). Both the extraction and the
-# bundle run out of conformance/driver-ct/deltic — the single deltic pin
-# site — mirroring conformance-ct::run-deltic-browser.
+# bundle run out of conformance/driver-ct/polyengine — the single polyengine pin
+# site — mirroring conformance-ct::run-polyengine-browser.
 [private]
-_carrier: (extract-deltic-translator root / "target/deltic-browser")
+_carrier: (extract-polyengine-translator root / "target/polyengine-browser")
     #!/usr/bin/env bash
     set -euo pipefail
-    cd '{{root}}/conformance/driver-ct/deltic'
+    cd '{{root}}/conformance/driver-ct/polyengine'
     mkdir -p {{root}}/js/componentize/wpt/parity/build
     deno bundle --config deno.json --frozen --platform browser \
-        -o {{root}}/js/componentize/wpt/parity/build/deltic-carrier.mjs \
-        {{root}}/js/componentize/wpt/parity/deltic-carrier.ts
+        -o {{root}}/js/componentize/wpt/parity/build/polyengine-carrier.mjs \
+        {{root}}/js/componentize/wpt/parity/polyengine-carrier.ts
 
 [private]
 build-echod:

@@ -1,8 +1,8 @@
-// The `wasi:sockets` import fragment for the parity carrier's deltic
+// The `wasi:sockets` import fragment for the parity carrier's polyengine
 // instantiation.
 //
 // The componentize-js runtime imports the seven `wasi:sockets@0.2`
-// interfaces unconditionally, and deltic's `wasi()` deliberately
+// interfaces unconditionally, and polyengine's `wasi()` deliberately
 // excludes sockets (mission scope: p2 baseline + p3 clocks). The parity
 // runner never opens a socket — every WebSocket it drives goes through
 // `polymorph:websocket/connections` — so every member here exists only to
@@ -10,10 +10,10 @@
 // mean the runner grew a socket dependency this stub is silently
 // breaking.
 //
-// This is the deltic-keyed reshape of the jco-era `sockets-stub.mjs`
+// This is the polyengine-keyed reshape of the jco-era `sockets-stub.mjs`
 // (same inventory, same throw-if-reached posture; removed with the jco
 // legs, see git history). Keys are compatibility-**track** keys (`@0.2`),
-// the same registration form `@deltic/wasi` uses, so one provider
+// the same registration form `@polyengine/wasi` uses, so one provider
 // serves whichever 0.2.x minor the guest's binary happens to name
 // (contracts/embedder-api.md §"Version canonicalization").
 

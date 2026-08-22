@@ -7,10 +7,10 @@ WebSocket suites run twice against the same suite echo server:
   `WebSocket` (Node's built-in) — no shim, no WIT, no wasm;
 - **round trip** (`parity/roundtrip.mjs`): through the full carrier stack —
   `js/componentize/websocket.js` (the shim), the `polymorph:websocket` WIT
-  surface, the component ABI, deltic's runtime linking, and
-  `js/deltic/websocket.ts` — terminating in the same platform WebSocket.
-  The carrier is one deno-bundled module (`parity/deltic-carrier.ts` →
-  `parity/build/deltic-carrier.mjs`): no transpile step, no generated
+  surface, the component ABI, polyengine's runtime linking, and
+  `js/polyengine/websocket.ts` — terminating in the same platform WebSocket.
+  The carrier is one deno-bundled module (`parity/polyengine-carrier.ts` →
+  `parity/build/polyengine-carrier.mjs`): no transpile step, no generated
   tree, no engine flag. componentize-js — the *guest* toolchain that
   builds the runner component — is unchanged.
 
@@ -27,8 +27,8 @@ without an exclusion list. `just wpt::parity` runs the gate;
 The leg bodies are engine-neutral (`parity/legs.mjs`); an engine driver
 supplies only the environment. `just wpt::parity-chromium` runs both legs
 inside a headless Chromium: the baseline measures Chromium's own
-`WebSocket`, and the round trip loads the same carrier bundle (deltic's
-wasi shims, plus `parity/sockets-stub-deltic.mjs` for the
+`WebSocket`, and the round trip loads the same carrier bundle (polyengine's
+wasi shims, plus `parity/sockets-stub-polyengine.mjs` for the
 `wasi:sockets` imports the componentize-js runtime declares but the runner
 never uses), served from a static mirror of the repository layout so every
 relative import — and the two wasm artifacts the carrier fetches —

@@ -51,7 +51,7 @@ jobs:
         # Owns the rev derivation, the rev-keyed tools cache, the
         # install, and the pins gate; the justfile's _ct-tools
         # recognizes the stamped install and does not repeat it.
-        uses: polymorph-components/polymorph-test/actions/setup@b4444a25a22106ad4128549bdc9e579552e62210
+        uses: polymorph-components/polymorph-test/actions/setup@38bfedf2b989522b82ddce5320fc1557a2f61461
         with:
           tools: component-test-cli
       - uses: pnpm/action-setup@v4
@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/deltic/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
+          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/polyengine/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
           restore-keys: pnpm-store-v2-${{ runner.os }}-
       - name: Install dependencies
         run: ./scripts/setup.sh
@@ -95,7 +95,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/deltic/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
+          key: pnpm-store-v2-${{ runner.os }}-${{ hashFiles('conformance/driver-ct/polyengine/pnpm-lock.yaml', 'js/componentize/wpt/parity/pnpm-lock.yaml') }}
       # The WPT parity Chromium leg always runs Playwright's own build,
       # pinned by playwright-core's version in the parity lockfile, so
       # losses-chromium.js measures one engine everywhere. The cache key
@@ -120,7 +120,7 @@ jobs:
             npx playwright-core install --with-deps chromium
           fi
       - run: just gha::conformance-checks
-        # The deltic-browser adapter finds the runner's preinstalled Chrome
+        # The polyengine-browser adapter finds the runner's preinstalled Chrome
         # via its candidate paths; CHROME_PATH overrides if ever needed.
 
       # Presentation, not verdict: the just recipe above already gated
@@ -131,15 +131,15 @@ jobs:
       # against the pin.
       - name: Publish the conformance matrix
         if: always() && hashFiles('conformance/driver-ct/results/*.jsonl') != ''
-        uses: polymorph-components/polymorph-test/actions/aggregate@b4444a25a22106ad4128549bdc9e579552e62210
+        uses: polymorph-components/polymorph-test/actions/aggregate@38bfedf2b989522b82ddce5320fc1557a2f61461
         with:
           lock: conformance/guest-ct/tests.lock
           manifest: conformance/driver-ct/targets.toml
           results: |
             wasmtime=conformance/driver-ct/results/wasmtime.jsonl
             composed=conformance/driver-ct/results/composed.jsonl
-            deltic-deno=conformance/driver-ct/results/deltic-deno.jsonl
-            deltic-browser=conformance/driver-ct/results/deltic-browser.jsonl
+            polyengine-deno=conformance/driver-ct/results/polyengine-deno.jsonl
+            polyengine-browser=conformance/driver-ct/results/polyengine-browser.jsonl
           summary-title: Conformance matrix
           cli: target/ct-tools/bin/component-test
           cargo-lock: Cargo.lock

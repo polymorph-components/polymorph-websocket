@@ -48,7 +48,7 @@ check-js:
     node --check js/componentize/wpt/runner.js
     node --check js/componentize/wpt/smoke.js
     node --check js/componentize/wpt/reporter.js
-    node --check js/componentize/wpt/parity/sockets-stub-deltic.mjs
+    node --check js/componentize/wpt/parity/sockets-stub-polyengine.mjs
     node --check js/componentize/wpt/parity/legs.mjs
     node --check js/componentize/wpt/parity/baseline.mjs
     node --check js/componentize/wpt/parity/roundtrip.mjs
@@ -56,7 +56,7 @@ check-js:
     node --check js/componentize/wpt/parity/run-legs.mjs
     node --check js/componentize/wpt/parity/smoke-run.mjs
     node --check js/componentize/wpt/parity/compare.mjs
-    node --check conformance/driver-ct/deltic/run-browser.mjs
+    node --check conformance/driver-ct/polyengine/run-browser.mjs
     node --check conformance/server/echod.mjs
     @echo "js: ok"
 
@@ -64,45 +64,46 @@ check-js:
 test:
     cargo test
 
-# js/deltic's own unit-test gate (type-check + tests); the conformance
-# leg itself is `conformance-ct::run-deltic`.
-deltic-module-check:
-    cd js/deltic && deno task check && deno task test
+# js/polyengine's own unit-test gate (type-check + tests); the
+# conformance leg itself is `conformance-ct::run-polyengine`.
+polyengine-module-check:
+    cd js/polyengine && deno task check && deno task test
 
-# The one-version-everywhere gate: every `jsr:@deltic/*` package resolved
-# in BOTH deno.locks (js/deltic and conformance/driver-ct/deltic) must
-# agree on the exact same resolved version, or the embedder module can
-# load twice across the module boundary (see js/deltic/deno.json's
-# MODULE-IDENTITY comment). js/deltic's manifest takes a caret range
-# (required for publishing to JSR) so the *lock*, not the manifest, is
-# the source of truth for the resolved version. @deltic/protocol is
-# excluded: it versions independently of the runtime/wasi/translator
-# family it's a transitive dependency of.
-exam-deltic:
+# The one-version-everywhere gate: every `jsr:@polyengine/*` package
+# resolved in BOTH deno.locks (js/polyengine and
+# conformance/driver-ct/polyengine) must agree on the exact same
+# resolved version, or the embedder module can load twice across the
+# module boundary (see js/polyengine/deno.json's MODULE-IDENTITY
+# comment). js/polyengine's manifest takes a caret range (required for
+# publishing to JSR) so the *lock*, not the manifest, is the source of
+# truth for the resolved version. @polyengine/protocol is excluded: it
+# versions independently of the runtime/wasi/translator family it's a
+# transitive dependency of.
+exam-polyengine:
     #!/usr/bin/env bash
     set -euo pipefail
-    v=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@deltic/(?!protocol)")) | .value' \
-        js/deltic/deno.lock conformance/driver-ct/deltic/deno.lock | sort -u)
+    v=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@polyengine/(?!protocol)")) | .value' \
+        js/polyengine/deno.lock conformance/driver-ct/polyengine/deno.lock | sort -u)
     if [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
-        echo "deltic pin drift: $v" >&2
+        echo "polyengine pin drift: $v" >&2
         exit 1
     fi
-    echo "deltic pin: $v"
+    echo "polyengine pin: $v"
 
-# The JS runner core's one-version gate: the deltic-browser driver's
+# The JS runner core's one-version gate: the polyengine-browser driver's
 # npm tree (@jsr/polymorph__test, JSR's npm-compat form of
 # jsr:@polymorph/test, routed through the tree's own .npmrc) and its
 # deno.lock (which locks the same package under its bare jsr: name for
 # the bundled worker import) must resolve the same version — a skewed
 # bump runs the JS harness against a Rust runner from a different
-# polymorph-test release. Wired next to exam-deltic in CI.
+# polymorph-test release. Wired next to exam-polyengine in CI.
 runner-js-pin-check:
     #!/usr/bin/env bash
     set -euo pipefail
     v=$({ grep -A1 "'@jsr/polymorph__test':" \
-            conformance/driver-ct/deltic/pnpm-lock.yaml \
+            conformance/driver-ct/polyengine/pnpm-lock.yaml \
         | sed -n "s/.*specifier: *//p"; \
-        jq -r '.jsr | keys[]' conformance/driver-ct/deltic/deno.lock \
+        jq -r '.jsr | keys[]' conformance/driver-ct/polyengine/deno.lock \
         | grep '^@polymorph/test@' | sed 's/.*@//'; } | sort -u)
     if [ -z "$v" ] || [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
         echo "runner-js pin drift: $v" >&2

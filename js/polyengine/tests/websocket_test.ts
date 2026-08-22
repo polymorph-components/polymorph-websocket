@@ -9,7 +9,7 @@
 // consumer's own conformance suite, executed by conformance/run.ts.
 
 import { assert, assertEquals, assertRejects, assertThrows } from "jsr:@std/assert@^1.0.0";
-import { ComponentException } from "@deltic/runtime/embedder";
+import { ComponentException } from "@polyengine/runtime/embedder";
 import {
   currentConfig,
   resetConfig,
@@ -213,21 +213,23 @@ Deno.test("receive-via-stream: single-use; pending receive is rejected", async (
   });
 });
 
-// The two tests below hand-roll deltic values from nothing but the
-// @deltic/protocol registry brands (`Symbol.for` keys pinned by upstream's
-// own tests): per the protocol contract, an object carrying the brand is a
-// legal value from ANY runtime copy, so these prove the module's
-// recognition sites work without class identity — the multi-copy exposure
-// #48 closes. The literal keys are deliberate: a brand-generation bump
-// upstream must fail here and force the recognition sites to be
-// revisited. (Key spellings are stable across upstream renames: the
-// `ComponentException` brand is still `deltic.witError/1`.)
+// The two tests below hand-roll polyengine values from nothing but the
+// @polyengine/protocol registry brands (`Symbol.for` keys pinned by
+// upstream's own tests): per the protocol contract, an object carrying the
+// brand is a legal value from ANY runtime copy, so these prove the
+// module's recognition sites work without class identity — the
+// multi-copy exposure #48 closes. The literal keys are deliberate: a
+// brand-generation bump upstream must fail here and force the
+// recognition sites to be revisited. (The `deltic.*` spellings were
+// retired by upstream's own A18 project rename — pre-A18 copies and
+// hand-rolled `deltic.*` brands do NOT interoperate with these by design;
+// the `ComponentException` brand is now `polyengine.witError/1`.)
 
 Deno.test("send-via-stream: a foreign-copy ComponentException's payload passes through the error wrap", async () => {
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
     const foreign = Object.assign(new Error("minted elsewhere"), {
-      [Symbol.for("deltic.witError/1")]: true,
+      [Symbol.for("polyengine.witError/1")]: true,
       payload: { kind: "invalid-argument", value: "minted by another copy" },
     });
     const producer = (async function* () {
@@ -259,7 +261,7 @@ Deno.test("send-via-stream: a hand-rolled branded byte stream takes the batched-
     // route it to the batched-read branch.
     let reads = 0;
     const data = {
-      [Symbol.for("deltic.stream/1")]: true,
+      [Symbol.for("polyengine.stream/1")]: true,
       read(_max: number): Promise<Uint8Array> {
         reads += 1;
         return Promise.resolve(reads === 1 ? payload : new Uint8Array(0));
