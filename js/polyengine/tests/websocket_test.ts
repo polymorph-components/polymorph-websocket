@@ -223,13 +223,13 @@ Deno.test("receive-via-stream: single-use; pending receive is rejected", async (
 // recognition sites to be revisited. (The `deltic.*` spellings were
 // retired by upstream's own A18 project rename — pre-A18 copies and
 // hand-rolled `deltic.*` brands do NOT interoperate with these by design;
-// the `ComponentException` brand is now `polyengine.witError/1`.)
+// the `ComponentException` brand is now `polyengine.componentException/1` (A19).)
 
 Deno.test("send-via-stream: a foreign-copy ComponentException's payload passes through the error wrap", async () => {
   await withServer(async (s) => {
     const ws = await Websocket.connect(`${s.base}/echo`, []);
     const foreign = Object.assign(new Error("minted elsewhere"), {
-      [Symbol.for("polyengine.witError/1")]: true,
+      [Symbol.for("polyengine.componentException/1")]: true,
       payload: { kind: "invalid-argument", value: "minted by another copy" },
     });
     const producer = (async function* () {
