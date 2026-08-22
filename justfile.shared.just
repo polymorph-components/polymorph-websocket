@@ -23,22 +23,23 @@ build-component crate:
         -o {{root}}/target/components/{{crate}}.wasm.tmp
     mv -f {{root}}/target/components/{{crate}}.wasm.tmp {{root}}/target/components/{{crate}}.wasm
 
-# Extract the deltic translator wasm from the pinned `@deltic/translator`
-# JSR package's lock-pinned module cache into `out_dir` — no network, no
-# sha256 bookkeeping (the JSR package's integrity lives in
-# conformance/driver-ct/deltic/deno.lock, enforced by --frozen). Every
-# browser leg that used to fetch a sha-pinned release asset now runs this
-# instead. Resolves against conformance/driver-ct/deltic's import map (the
-# single deltic pin site); asserts every module in the translator's graph
-# resolves to the one pinned version before copying.
+# Extract the polyengine translator wasm from the pinned
+# `@polyengine/translator` JSR package's lock-pinned module cache into
+# `out_dir` — no network, no sha256 bookkeeping (the JSR package's
+# integrity lives in conformance/driver-ct/polyengine/deno.lock,
+# enforced by --frozen). Every browser leg that used to fetch a
+# sha-pinned release asset now runs this instead. Resolves against
+# conformance/driver-ct/polyengine's import map (the single polyengine
+# pin site); asserts every module in the translator's graph resolves to
+# the one pinned version before copying.
 [private]
-extract-deltic-translator out_dir:
+extract-polyengine-translator out_dir:
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p {{out_dir}}
     info=$(mktemp)
     trap 'rm -f "$info"' EXIT
-    deno info --json --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
-        @deltic/translator > "$info"
-    pin=$(grep -o 'jsr:@deltic/runtime@[^/"]*' {{root}}/conformance/driver-ct/deltic/deno.json | head -1 | sed 's/.*@//')
-    python3 "{{root}}/scripts/extract-deltic-translator.py" "$info" {{out_dir}} "$pin"
+    deno info --json --config {{root}}/conformance/driver-ct/polyengine/deno.json --frozen \
+        @polyengine/translator > "$info"
+    pin=$(grep -o 'jsr:@polyengine/runtime@[^/"]*' {{root}}/conformance/driver-ct/polyengine/deno.json | head -1 | sed 's/.*@//')
+    python3 "{{root}}/scripts/extract-polyengine-translator.py" "$info" {{out_dir}} "$pin"

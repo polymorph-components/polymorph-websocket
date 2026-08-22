@@ -28,25 +28,26 @@ Layout (each directory's justfile module in parentheses):
 - `rust/wasmtime/` — the `wasmtime-websocket` host crate. Its knobs (the
   connect/close bounds, the inbound-buffer bound) live on
   `WasiWebsocketCtx`; the crate reads no ambient environment.
-- `js/deltic/` (`just deltic-module-check`) — `websocket.ts`, THE
+- `js/polyengine/` (`just polyengine-module-check`) — `websocket.ts`, THE
   browser-first JS host module, over
-  [deltic](https://github.com/lann/deltic)'s embedder conventions (typed
-  streams, `ComponentException`) for its runtime-linked, no-transpile legs
-  (`conformance/driver-ct/deltic/`, the WPT parity round trip, the demo).
+  [polyengine](https://github.com/polymorph-components/polyengine)'s (formerly
+  `deltic`) embedder conventions (typed streams, `ComponentException`) for
+  its runtime-linked, no-transpile legs
+  (`conformance/driver-ct/polyengine/`, the WPT parity round trip, the demo).
   Its knobs are exported functions (`configure`,
   `setMaxInboundBufferBytes`, `setConnectTimeoutMs`, `setCloseTimeoutMs`);
   the module reads no ambient configuration. The
-  deltic release is pinned in TWO import maps — `js/deltic/deno.json` and
-  `conformance/driver-ct/deltic/deno.json` — as exact-pinned JSR
-  prereleases (`jsr:@deltic/<pkg>@0.1.0-pre.g<hash>`; a version names one
-  upstream commit) which must agree on the `@deltic/runtime` version
-  (deltic's `wasi-shims` imports `@deltic/runtime/embedder` by bare
+  polyengine release is pinned in TWO import maps — `js/polyengine/deno.json` and
+  `conformance/driver-ct/polyengine/deno.json` — as exact-pinned JSR
+  prereleases (`jsr:@polyengine/<pkg>@0.3.0-pre.g<hash>`; a version names one
+  upstream commit) which must agree on the `@polyengine/runtime` version
+  (polyengine's `wasi` module imports `@polyengine/runtime/embedder` by bare
   specifier internally, so a drift would load the embedder module twice
   and split the runtime/translator plan-format pairing; value recognition
-  itself is brand-based — deltic's `@deltic/protocol` predicates, not
+  itself is brand-based — polyengine's `@polyengine/protocol` predicates, not
   `instanceof` — and survives a multi-copy graph); the root
-  justfile's `exam-deltic` recipe (CI-wired) asserts one version
-  repo-wide. Bump procedure: `conformance/driver-ct/deltic/README.md`.
+  justfile's `exam-polyengine` recipe (CI-wired) asserts one version
+  repo-wide. Bump procedure: `conformance/driver-ct/polyengine/README.md`.
 - `js/componentize/` (`just wpt::…`) — `websocket.js`, the WHATWG-API
   shim for componentize-js guests (deviations registry in its header), and
   the WPT parity gate (`wpt/README.md` is the vendoring policy; losses
@@ -54,21 +55,21 @@ Layout (each directory's justfile module in parentheses):
 - `conformance/` (`just conformance-ct`) — the conformance suite on the
   `polymorph:test` harness: `guest-ct/` (the suite component; the
   committed `tests.lock` is the corpus inventory),
-  `driver-ct/` (wasmtime + composed + deltic-deno + deltic-browser legs,
+  `driver-ct/` (wasmtime + composed + polyengine-deno + polyengine-browser legs,
   `targets.toml`
   with the expected-fail mechanism, the committed `matrix.md`), and
   `server/` (echod; `server/PROTOCOL.md` is its wire contract,
   `server/echod.mjs` the shared Node spawn helpers). The suite crates
   consume the harness as rev-pinned git dependencies (the two
   `[workspace.dependencies]` entries in the root `Cargo.toml`), the
-  deltic-browser driver consumes its JS runner core from JSR
-  (`@jsr/polymorph__test` in `driver-ct/deltic/package.json`), and
+  polyengine-browser driver consumes its JS runner core from JSR
+  (`@jsr/polymorph__test` in `driver-ct/polyengine/package.json`), and
   the `component-test` CLI is cargo-installed at the rev Cargo.lock
   records (`conformance-ct::_ct-tools`). Both sides of a bump name one
   polymorph-test release; the root `Cargo.toml` comment is the bump
   checklist. There is no transpiler
   dependency anywhere: the JS host legs are runtime-linked by the pinned
-  deltic JSR prereleases (single pin site: `driver-ct/deltic/{deno.json,
+  polyengine JSR prereleases (single pin site: `driver-ct/polyengine/{deno.json,
   deno.lock}`).
 - `examples/` (`just demo::…`) — the echo-demo guest and its host runners.
 
@@ -92,13 +93,13 @@ places listed failing at run time. The sites:
   `examples/wasmtime-demo/src/lib.rs`;
 - `wit_bindgen::generate!` in the suite (`conformance/guest-ct/src/lib.rs`)
   and its import paths in `guest-ct/src/body.rs`;
-- the deltic imports records, keyed by verbatim versioned WIT id and
-  failing at run time rather than build time: `js/deltic/websocket.ts`
+- the polyengine imports records, keyed by verbatim versioned WIT id and
+  failing at run time rather than build time: `js/polyengine/websocket.ts`
   (`CONNECTIONS_INTERFACE`, `websocketImports`), the parity carrier
-  (`js/componentize/wpt/parity/deltic-carrier.ts`), and the exported
-  export ids in `examples/deltic-demo/run.ts`;
-- the deltic host module's exported resource-class names, which the
-  embedder maps by resource name: `js/deltic/websocket.ts`.
+  (`js/componentize/wpt/parity/polyengine-carrier.ts`), and the exported
+  export ids in `examples/polyengine-demo/run.ts`;
+- the polyengine host module's exported resource-class names, which the
+  embedder maps by resource name: `js/polyengine/websocket.ts`.
 
 Before designing WIT or touching async/stream plumbing, consult
 [`lann/wasm-component-starter`](https://github.com/lann/wasm-component-starter)
@@ -114,10 +115,10 @@ decision to record, not a refactor.
   defined exactly once, at the root `wit/`. Components pull it in through
   `wit/deps` **symlinks** back to the root. Do not copy the package into a
   component or replace those symlinks with real directories.
-- **The JS host must stay browser-compatible.** `js/deltic/websocket.ts`
+- **The JS host must stay browser-compatible.** `js/polyengine/websocket.ts`
   uses only the standard `WebSocket` API — no `node:` modules, no
   Deno-only APIs: the same file must load in a browser unchanged (the
-  deltic-browser conformance row and the Chromium parity leg both depend
+  polyengine-browser conformance row and the Chromium parity leg both depend
   on it).
 - **The browser API bounds the portable surface.** Capabilities the browser
   `WebSocket` cannot serve (headers, client certs, ping/pong, trust

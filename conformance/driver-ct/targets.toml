@@ -2,11 +2,11 @@
 # (the #48-mechanism successor to ../targets.toml).
 #
 # The wasmtime rows run under the generic component-test host runner and
-# the composed row runs the wac-composed in-guest provider; the deltic
+# the composed row runs the wac-composed in-guest provider; the polyengine
 # rows runtime-link the same suite artifact under the release-pinned
-# deltic runtime — on stock Deno (driver-ct/deltic/run.ts) and inside
-# headless Chromium (driver-ct/deltic/run-browser.mjs), with no transpile
-# step and no engine flag.
+# polyengine runtime — on stock Deno (driver-ct/polyengine/run.ts) and
+# inside headless Chromium (driver-ct/polyengine/run-browser.mjs), with no
+# transpile step and no engine flag.
 #
 # No [features]: every current target serves the whole polymorph:websocket
 # surface. When a capability gap appears, declare it here (`[features.x]
@@ -25,11 +25,11 @@ missing-features = []
 [targets.composed]
 missing-features = []
 
-[targets.deltic-deno]
+[targets.polyengine-deno]
 missing-features = []
 
 # The same suite runtime-linked inside headless Chromium against the
-# deltic host module (js/deltic/websocket.ts over the browser's native
-# WebSocket): one deno-bundled worker, no transpile step.
-[targets.deltic-browser]
+# polyengine host module (js/polyengine/websocket.ts over the browser's
+# native WebSocket): one deno-bundled worker, no transpile step.
+[targets.polyengine-browser]
 missing-features = []

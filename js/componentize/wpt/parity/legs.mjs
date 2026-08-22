@@ -12,7 +12,7 @@
 // Since the carrier is a bundle, its reporter copy is distinct from this
 // repository's `../reporter.js` module — so the round-trip leg takes
 // BOTH `setSink` and the runner from the carrier and never imports
-// `../reporter.js` itself (see deltic-carrier.ts's header).
+// `../reporter.js` itself (see polyengine-carrier.ts's header).
 
 /**
  * The baseline leg: run the vendored WPT suites directly against this
@@ -41,14 +41,14 @@ export async function runBaseline(wsBase) {
 
 /**
  * The round-trip leg: the same suites through the full carrier stack —
- * shim, WIT, component ABI, deltic, js/deltic/websocket.ts — terminating
+ * shim, WIT, component ABI, polyengine, js/polyengine/websocket.ts — terminating
  * in the same platform `WebSocket` the baseline measured, against the
  * same echo server. Collects the records the runner streams through its
  * `wpt:parity/reporter` import and cross-checks the count `run` resolves
  * to; a record lost between the runner and the sink fails the leg.
  *
  * `carrier` is supplied by the engine driver, which owns byte loading:
- * `url` is the bundled carrier module (build/deltic-carrier.mjs),
+ * `url` is the bundled carrier module (build/polyengine-carrier.mjs),
  * `translatorPath`/`componentPath` name the two wasm artifacts as
  * repository-relative paths, and `loadBytes` reads one (Node: fs;
  * browser: fetch against the static server).

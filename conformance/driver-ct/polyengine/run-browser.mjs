@@ -1,9 +1,9 @@
-// The deltic-browser leg: the suite runtime-linked inside a real
-// headless Chromium against this repo's deltic host module
-// (js/deltic/websocket.ts over the browser's native WebSocket) — no
+// The polyengine-browser leg: the suite runtime-linked inside a real
+// headless Chromium against this repo's polyengine host module
+// (js/polyengine/websocket.ts over the browser's native WebSocket) — no
 // transpile step, no generated tree. The page, worker pool, stall
 // watchdog, and Chrome ladder live in the upstream browser driver; the
-// worker is this repo's own bundle (browser/worker-entry.ts: the deltic
+// worker is this repo's own bundle (browser/worker-entry.ts: the polyengine
 // engine + host module + upstream message loop in one module — see the
 // entry's header for why one bundle is the sound shape). This file is
 // the frame: the echo server, the environment, target configuration,
@@ -28,10 +28,10 @@ import { writeResultsFile } from "@jsr/polymorph__test/node-runner";
 
 import { spawnEchod, unreachableUrl } from "../../server/echod.mjs";
 
-const DELTIC_DIR = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(DELTIC_DIR, "..", "..", "..");
-const WORKER_URL = "/target/deltic-browser/websocket-worker.mjs";
-const TRANSLATOR_URL = "/target/deltic-browser/deltic-translator-shim.wasm";
+const POLYENGINE_DIR = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(POLYENGINE_DIR, "..", "..", "..");
+const WORKER_URL = "/target/polyengine-browser/websocket-worker.mjs";
+const TRANSLATOR_URL = "/target/polyengine-browser/polyengine-translator-shim.wasm";
 const MAX_INBOUND_BUFFER_BYTES = 256 * 1024;
 const CASE_TIMEOUT_MS = 60_000;
 const STALL_TIMEOUT_MS = 90_000;
@@ -42,7 +42,7 @@ const { values } = parseArgs({
       type: "string",
       default: join(REPO_ROOT, "conformance", "driver-ct", "results"),
     },
-    target: { type: "string", default: "deltic-browser" },
+    target: { type: "string", default: "polyengine-browser" },
     server: { type: "string" },
     "tls-server": { type: "string" },
     "echod-bin": {
@@ -54,8 +54,8 @@ const { values } = parseArgs({
 
 async function main() {
   for (const [what, rel] of [
-    ["bundled worker (run `just conformance-ct::run-deltic-browser`)", WORKER_URL],
-    [`translator asset (run \`just conformance-ct::run-deltic-browser\`)`, TRANSLATOR_URL],
+    ["bundled worker (run `just conformance-ct::run-polyengine-browser`)", WORKER_URL],
+    [`translator asset (run \`just conformance-ct::run-polyengine-browser\`)`, TRANSLATOR_URL],
     ["suite component (run `just conformance-ct::build-suite`)", "/target/wasm32-wasip2/release/conformance_guest_ct.wasm"],
   ]) {
     try {
@@ -104,7 +104,7 @@ async function main() {
       executablePath: await findChrome(),
       repoRoot: REPO_ROOT,
       html: buildHarnessPage({
-        title: "polymorph:websocket conformance (deltic-browser)",
+        title: "polymorph:websocket conformance (polyengine-browser)",
         config,
       }),
       stallTimeoutMs: STALL_TIMEOUT_MS,

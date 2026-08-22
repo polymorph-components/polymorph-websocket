@@ -1,8 +1,8 @@
 // The smoke entry's embedder (`just wpt::smoke`): instantiate the
-// componentized smoke component under the SAME deltic carrier the
+// componentized smoke component under the SAME polyengine carrier the
 // round-trip leg uses (it exports the same world) against the suite echo
 // server, and require the streamed marker back. No transpile step, no
-// engine flag — a fast bisector for componentize-js or deltic-pin bumps.
+// engine flag — a fast bisector for componentize-js or polyengine-pin bumps.
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -14,12 +14,12 @@ const REPO_ROOT = resolve(HERE, "..", "..", "..", "..");
 const loadBytes = async (path) => new Uint8Array(await readFile(join(REPO_ROOT, path)));
 
 const { setSink, instantiateRunner } = await import(
-  pathToFileURL(join(HERE, "build", "deltic-carrier.mjs")).href
+  pathToFileURL(join(HERE, "build", "polyengine-carrier.mjs")).href
 );
 setSink((record) => console.error("[smoke]", JSON.parse(record).name));
 
 const [translatorBytes, componentBytes] = await Promise.all([
-  loadBytes("target/deltic-browser/deltic-translator-shim.wasm"),
+  loadBytes("target/polyengine-browser/polyengine-translator-shim.wasm"),
   loadBytes("js/componentize/wpt/build/smoke.component.wasm"),
 ]);
 const runner = await instantiateRunner(translatorBytes, componentBytes);

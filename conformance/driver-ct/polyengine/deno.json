@@ -1,0 +1,15 @@
+{
+  "//": "MODULE-IDENTITY CONSTRAINT: polyengine's wasi module imports @polyengine/runtime/embedder by bare specifier internally. The @polyengine/runtime/embedder entry here must resolve to the IDENTICAL @polyengine/runtime version as ../../../js/polyengine/deno.json's caret range (in both deno.locks), or the embedder module loads twice: value recognition survives that (websocket.ts recognizes polyengine values by @polyengine/protocol brand predicates, not instanceof), but a second copy splits the runtime/translator plan-format pairing, and stateful handles (streams/futures) minted by one copy are refused by the other. Pin story: exact-pinned JSR releases (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor; per-commit `<next>-pre.g<hash>` prereleases exist between releases — pin exactly); @polyengine/translator ships the translator wasm for that SAME commit; deno.lock carries integrity, --frozen enforced everywhere; one version repo-wide is asserted by the pin gate (justfile: exam-polyengine).",
+  "imports": {
+    "@polyengine/ct-runner": "jsr:@polyengine/ct-runner@0.3.0",
+    "@polyengine/runtime/embedder": "jsr:@polyengine/runtime@0.3.0/embedder",
+    "@polyengine/runtime/shim": "jsr:@polyengine/runtime@0.3.0/shim",
+    "@polyengine/wasi": "jsr:@polyengine/wasi@0.3.0",
+    "@polyengine/translator": "jsr:@polyengine/translator@0.3.0",
+    "@polymorph/test/polyengine-worker-main": "jsr:@polymorph/test@0.2.0/polyengine-worker-main"
+  },
+  "minimumDependencyAge": { "age": "P1D", "exclude": ["jsr:@polyengine/*", "jsr:@polymorph/*"] },
+  "tasks": {
+    "check": "deno check run.ts browser/worker-entry.ts browser-bundle-entry.ts"
+  }
+}

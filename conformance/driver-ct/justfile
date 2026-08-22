@@ -17,7 +17,7 @@ results := root / "conformance/driver-ct/results"
 default: all
 
 # Build + lockfile gate + run every leg + aggregate + matrix gate.
-all: build lock-check run-wasmtime run-composed run-deltic run-deltic-browser aggregate matrix-check
+all: build lock-check run-wasmtime run-composed run-polyengine run-polyengine-browser aggregate matrix-check
 
 # ----- builders ---------------------------------------------------------------
 
@@ -129,8 +129,8 @@ run-composed: compose-suite build-driver build-echod
         --composed --suite-artifact {{suite_wasm}} \
         --jsonl --jobs 4 --target composed > {{results}}/composed.jsonl
 
-# The deltic-native leg: runtime-linked under stock Deno, no transpile
-# step. The translator comes from the packaged `@deltic/translator` JSR
+# The polyengine-native leg: runtime-linked under stock Deno, no transpile
+# step. The translator comes from the packaged `@polyengine/translator` JSR
 # prerelease through the module graph — no fetch step, no sha256
 # bookkeeping, no net grant. run.ts owns the suite run. Scoped
 # permissions throughout, EXCEPT --allow-run: Deno refuses a *scoped*
@@ -142,41 +142,41 @@ run-composed: compose-suite build-driver build-echod
 # is still just the echod binary. DENO_CERT provisions trust for the
 # suite's committed test PKI, the Deno analogue of the NODE_EXTRA_CA_CERTS
 # the retired jco Node leg carried (see git history).
-run-deltic: build-suite build-echod
+run-polyengine: build-suite build-echod
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p {{results}}
     DENO_CERT={{root}}/conformance/server/tls/ca.pem {{timeout_cmd}} deno run \
-        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
+        --config {{root}}/conformance/driver-ct/polyengine/deno.json --frozen \
         --allow-read={{root}} \
         --allow-write={{results}} \
         --allow-net=127.0.0.1,localhost \
         --allow-run \
         --allow-env=DENO_CERT \
-        {{root}}/conformance/driver-ct/deltic/run.ts \
-        --out {{results}}/deltic-deno.jsonl --target deltic-deno
+        {{root}}/conformance/driver-ct/polyengine/run.ts \
+        --out {{results}}/polyengine-deno.jsonl --target polyengine-deno
 
-# The deltic browser driver's npm tree (the upstream page driver +
+# The polyengine browser driver's npm tree (the upstream page driver +
 # worker message loop + playwright-core; no transpiler).
-_deltic-browser-prepared:
+_polyengine-browser-prepared:
     #!/usr/bin/env bash
     set -euo pipefail
-    cd {{root}}/conformance/driver-ct/deltic
+    cd {{root}}/conformance/driver-ct/polyengine
     if [ pnpm-lock.yaml -nt node_modules/.modules.yaml ]; then
         pnpm install --silent
     fi
 
-# The suite runtime-linked inside headless Chromium against the deltic
+# The suite runtime-linked inside headless Chromium against the polyengine
 # host module: the worker is one deno-bundled module (engine + host
 # module + message loop; browser/worker-entry.ts), so no transpile step
 # and no generated tree.
-run-deltic-browser: build-suite build-echod _deltic-browser-prepared (extract-deltic-translator root / "target/deltic-browser")
+run-polyengine-browser: build-suite build-echod _polyengine-browser-prepared (extract-polyengine-translator root / "target/polyengine-browser")
     #!/usr/bin/env bash
     set -euo pipefail
-    cd {{root}}/conformance/driver-ct/deltic
-    mkdir -p {{root}}/target/deltic-browser
+    cd {{root}}/conformance/driver-ct/polyengine
+    mkdir -p {{root}}/target/polyengine-browser
     deno bundle --config deno.json --frozen --platform browser \
-        -o {{root}}/target/deltic-browser/websocket-worker.mjs browser/worker-entry.ts
+        -o {{root}}/target/polyengine-browser/websocket-worker.mjs browser/worker-entry.ts
     mkdir -p {{results}}
     {{timeout_cmd}} node run-browser.mjs
 
@@ -188,8 +188,8 @@ aggregate: _ct-tools
         --manifest {{root}}/conformance/driver-ct/targets.toml \
         --results wasmtime={{results}}/wasmtime.jsonl \
         --results composed={{results}}/composed.jsonl \
-        --results deltic-deno={{results}}/deltic-deno.jsonl \
-        --results deltic-browser={{results}}/deltic-browser.jsonl \
+        --results polyengine-deno={{results}}/polyengine-deno.jsonl \
+        --results polyengine-browser={{results}}/polyengine-browser.jsonl \
         -o {{results}}/matrix.md
 
 # The committed matrix is the cross-target review surface; regenerate

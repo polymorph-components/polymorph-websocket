@@ -1,8 +1,8 @@
 // Node-only helpers for everything that drives the suite echo server from
-// Node (the deltic-browser conformance driver, the WPT parity legs):
+// Node (the polyengine-browser conformance driver, the WPT parity legs):
 // spawning the `conformance-echod` binary and deriving the unreachable
 // URL. Colocated with the server it spawns. The Deno-side drivers
-// (conformance/driver-ct/deltic/run.ts, examples/deltic-demo/run.ts) port
+// (conformance/driver-ct/polyengine/run.ts, examples/polyengine-demo/run.ts) port
 // the same LISTENING-line contract rather than importing this module.
 import { spawn } from "node:child_process";
 import net from "node:net";
@@ -65,9 +65,9 @@ export function unreachableUrl() {
 
 /**
  * Fail fast, with the reason, on a Node older than this repo's floor. No
- * engine flag is involved anywhere any more — deltic's callback ABI needs
+ * engine flag is involved anywhere any more — polyengine's callback ABI needs
  * none — but the Node-side drivers and their toolchain (the parity legs,
- * the deltic-browser page driver) are only exercised on Node 24+.
+ * the polyengine-browser page driver) are only exercised on Node 24+.
  */
 export function requireNode24() {
   const major = Number(process.versions.node.split(".")[0]);

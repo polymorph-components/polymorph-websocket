@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "WPT parity gate: the vendored WebSocket suites run directly against the platform's WebSocket (baseline) and through the componentized shim runtime-linked by deltic against js/deltic/websocket.ts (round trip); compare.mjs holds the round trip to the baseline's pass set.",
+  "description": "WPT parity gate: the vendored WebSocket suites run directly against the platform's WebSocket (baseline) and through the componentized shim runtime-linked by polyengine against js/polyengine/websocket.ts (round trip); compare.mjs holds the round trip to the baseline's pass set.",
   "packageManager": "pnpm@10.34.5",
   "scripts": {
     "baseline": "node baseline.mjs",

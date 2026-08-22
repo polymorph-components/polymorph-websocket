@@ -17,24 +17,24 @@ test: component build-echod
 wasmtime count="100": component build-echod
     cargo run -p wasmtime-demo -- {{root}}/target/components/echo-demo.wasm {{count}}
 
-# Run the JS-host demo by hand: `just demo::deltic [count]` — the same
-# component runtime-linked under deltic on stock Deno against
-# js/deltic/websocket.ts, with no transpile step and no engine flag. The
-# translator comes from the packaged `@deltic/translator` JSR prerelease
-# through the module graph — no fetch step. The deltic pin is single-site:
-# the import map is conformance/driver-ct/deltic/deno.json.
-deltic count="100": component build-echod
+# Run the JS-host demo by hand: `just demo::polyengine [count]` — the same
+# component runtime-linked under polyengine on stock Deno against
+# js/polyengine/websocket.ts, with no transpile step and no engine flag. The
+# translator comes from the packaged `@polyengine/translator` JSR prerelease
+# through the module graph — no fetch step. The polyengine pin is single-site:
+# the import map is conformance/driver-ct/polyengine/deno.json.
+polyengine count="100": component build-echod
     #!/usr/bin/env bash
     set -euo pipefail
-    # --allow-run is unscoped for the same reason run-deltic's is: Deno
+    # --allow-run is unscoped for the same reason run-polyengine's is: Deno
     # refuses a scoped --allow-run whenever dynamic-linker vars sit in the
-    # ambient environment (see the conformance-ct::run-deltic comment).
+    # ambient environment (see the conformance-ct::run-polyengine comment).
     deno run \
-        --config {{root}}/conformance/driver-ct/deltic/deno.json --frozen \
+        --config {{root}}/conformance/driver-ct/polyengine/deno.json --frozen \
         --allow-read={{root}} \
         --allow-net=127.0.0.1,localhost \
         --allow-run \
-        {{root}}/examples/deltic-demo/run.ts {{count}}
+        {{root}}/examples/polyengine-demo/run.ts {{count}}
 
 [private]
 build-echod:

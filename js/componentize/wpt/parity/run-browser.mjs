@@ -1,7 +1,7 @@
 // The browser parity legs: the same two legs as run-legs.mjs — the shared
 // bodies in legs.mjs — run inside a real, headless Chromium, so the
 // baseline measures Chromium's own `WebSocket` and the round trip runs
-// the deltic carrier bundle against js/deltic/websocket.ts in the
+// the polyengine carrier bundle against js/polyengine/websocket.ts in the
 // environment it actually targets. The comparator is the same
 // compare.mjs; the ratchet is per-engine (losses-chromium.js), because a
 // loss set is a fact about one engine's baseline.
@@ -10,8 +10,8 @@
 // the served modules' relative imports (legs.mjs -> ../harness.js, the
 // vendored group modules) resolve with no bundling and the same URL
 // identity legs.mjs relies on; the carrier itself is one bundle
-// (parity/build/deltic-carrier.mjs) and the two wasm artifacts it needs —
-// the pinned deltic translator under /target/deltic-browser/ and the
+// (parity/build/polyengine-carrier.mjs) and the two wasm artifacts it needs —
+// the pinned polyengine translator under /target/polyengine-browser/ and the
 // parity runner component — are fetched from the same server. The page opens
 // `ws:` connections to the echo server directly: WebSocket is not subject
 // to CORS, and a localhost `http:` page may open `ws:` connections.
@@ -20,7 +20,7 @@
 // playwright-core's version (the parity lockfile), so losses-chromium.js
 // measures one engine everywhere — local runs and CI alike. Install it
 // once with `npx playwright-core install --with-deps chromium` (from this
-// directory). No engine flag is involved: deltic runs the runner
+// directory). No engine flag is involved: polyengine runs the runner
 // component's async exports on the callback ABI.
 //
 // Usage: node run-browser.mjs [--update]
@@ -48,8 +48,8 @@ const MIME = {
 
 // The subtrees a page may read: the WPT gate's own tree (harness, groups,
 // reporter, parity modules, the carrier bundle and the runner component)
-// and the pinned deltic translator asset the carrier translates with.
-const SERVED_PREFIXES = ["/js/componentize/wpt/", "/target/deltic-browser/"];
+// and the pinned polyengine translator asset the carrier translates with.
+const SERVED_PREFIXES = ["/js/componentize/wpt/", "/target/polyengine-browser/"];
 
 /** Serve the repository layout, read-only, under SERVED_PREFIXES. */
 function startServer() {
@@ -95,8 +95,8 @@ async function runLegInPage({ base, wsBase, leg }) {
   const legs = await import(`${base}/js/componentize/wpt/parity/legs.mjs`);
   if (leg === "baseline") return legs.runBaseline(wsBase);
   const carrier = {
-    url: `${base}/js/componentize/wpt/parity/build/deltic-carrier.mjs`,
-    translatorPath: "target/deltic-browser/deltic-translator-shim.wasm",
+    url: `${base}/js/componentize/wpt/parity/build/polyengine-carrier.mjs`,
+    translatorPath: "target/polyengine-browser/polyengine-translator-shim.wasm",
     componentPath: "js/componentize/wpt/build/parity-runner.component.wasm",
     async loadBytes(path) {
       const resp = await fetch(`${base}/${path}`);
@@ -109,9 +109,9 @@ async function runLegInPage({ base, wsBase, leg }) {
 
 async function main() {
   for (const [what, rel] of [
-    ["carrier bundle (run `just wpt::parity-chromium`)", "js/componentize/wpt/parity/build/deltic-carrier.mjs"],
+    ["carrier bundle (run `just wpt::parity-chromium`)", "js/componentize/wpt/parity/build/polyengine-carrier.mjs"],
     ["parity runner component (run `js/componentize/wpt/component.sh build`)", "js/componentize/wpt/build/parity-runner.component.wasm"],
-    ["translator asset (run `just wpt::parity-chromium`)", "target/deltic-browser/deltic-translator-shim.wasm"],
+    ["translator asset (run `just wpt::parity-chromium`)", "target/polyengine-browser/polyengine-translator-shim.wasm"],
   ]) {
     try {
       await access(join(REPO_ROOT, rel));

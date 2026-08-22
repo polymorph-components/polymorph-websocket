@@ -1,5 +1,5 @@
 // The embedder half of the parity runner's `wpt:parity/reporter` import:
-// the round trip's carrier bundle (parity/deltic-carrier.ts) provides
+// the round trip's carrier bundle (parity/polyengine-carrier.ts) provides
 // this module as that interface, so whichever environment loads the
 // carrier installs its sink through the carrier's re-exported `setSink`
 // before invoking `run`, and receives each record as the test settles.

@@ -3,7 +3,7 @@
 // componentize-js (https://github.com/lann/componentize-js, the wit-dylib
 // reboot of ComponentizeJS), backed by the `polymorph:websocket` imports.
 //
-// This is the inverse of `js/deltic/websocket.ts`: that module implements
+// This is the inverse of `js/polyengine/websocket.ts`: that module implements
 // the WIT *imports* over the standard browser API, while this one
 // implements the standard browser API *over* the WIT imports, so JS
 // application code written against `WebSocket` can be componentized and

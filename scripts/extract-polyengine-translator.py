@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Extract the deltic translator wasm from a `deno info --json` graph.
+"""Extract the polyengine translator wasm from a `deno info --json` graph.
 
-Used by justfile.shared.just's extract-deltic-translator recipe: every
-browser leg that used to fetch a sha256-pinned GitHub release asset now
-copies the translator wasm straight out of the `@deltic/translator` JSR
-package's lock-pinned module cache instead (no network, no sha
-bookkeeping — the package's integrity lives in
-conformance/driver-ct/deltic/deno.lock, enforced by --frozen).
+Used by justfile.shared.just's extract-polyengine-translator recipe:
+every browser leg that used to fetch a sha256-pinned GitHub release
+asset now copies the translator wasm straight out of the
+`@polyengine/translator` JSR package's lock-pinned module cache instead
+(no network, no sha bookkeeping — the package's integrity lives in
+conformance/driver-ct/polyengine/deno.lock, enforced by --frozen).
 
-Usage: extract-deltic-translator.py <deno-info.json> <out_dir> <expected-pin>
+Usage: extract-polyengine-translator.py <deno-info.json> <out_dir> <expected-pin>
 """
 import json
 import sys
@@ -17,7 +17,7 @@ import sys
 def main() -> None:
     info_path, out_dir, pin = sys.argv[1], sys.argv[2], sys.argv[3]
     graph = json.load(open(info_path))
-    mods = [m for m in graph["modules"] if "/@deltic/" in m.get("specifier", "")]
+    mods = [m for m in graph["modules"] if "/@polyengine/" in m.get("specifier", "")]
     bad = {m["specifier"] for m in mods if pin not in m["specifier"]}
     if bad:
         sys.exit(f"pin drift in translator graph (expected {pin}): {bad}")
@@ -31,7 +31,7 @@ def main() -> None:
     # "unexpected section" near EOF).
     with open(asset["local"], "rb") as f:
         data = f.read(asset["size"])
-    with open(out_dir + "/deltic-translator-shim.wasm", "wb") as f:
+    with open(out_dir + "/polyengine-translator-shim.wasm", "wb") as f:
         f.write(data)
 
 

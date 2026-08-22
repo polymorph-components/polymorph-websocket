@@ -1,7 +1,7 @@
-// The repo's own deltic leg of the component-test conformance harness:
+// The repo's own polyengine leg of the component-test conformance harness:
 // this repo's flagship gate is `just conformance-ct` running EVERY target
-// (wasmtime, composed, deltic-deno, deltic-browser) against the shared
-// suite; this is the deltic-native Deno target. It began as the deltic
+// (wasmtime, composed, polyengine-deno, polyengine-browser) against the shared
+// suite; this is the polyengine-native Deno target. It began as the deltic
 // analogue of the jco Node leg (`conformance/driver-ct/jco/run-node.mjs`,
 // retired with the jco legs; see git history), mirroring it exactly:
 //
@@ -14,27 +14,27 @@
 //   `runSuite(...)` (component-test-js)        | `runSuite(...)` (ct-runner)
 //   `NODE_EXTRA_CA_CERTS=…/tls/ca.pem`         | `DENO_CERT=…/tls/ca.pem`
 //
-// deltic is a runtime linker: there is no transpile step, no generated
+// polyengine is a runtime linker: there is no transpile step, no generated
 // tree, and no engine flag — the WIT contract's async
 // exports run on the callback ABI under stock Deno.
 //
-//   just conformance-ct::run-deltic          # the full leg
+//   just conformance-ct::run-polyengine          # the full leg
 //   … run.ts [--translator <shim.wasm>] [--only SUBSTRING] [--jspi]
 //
 // `DENO_CERT` must name the suite's committed test CA so the three
 // `websocket/tls/*` cases can complete their handshake; the
-// `conformance-ct::run-deltic` justfile recipe supplies it. NO cases are
+// `conformance-ct::run-polyengine` justfile recipe supplies it. NO cases are
 // excluded: the TLS leg runs headlessly under Deno exactly as the ws:
 // leg does.
 //
-// MODULE-IDENTITY CONSTRAINT: deltic's wasi module imports
-// `@deltic/runtime/embedder` by bare specifier internally; this leg's
-// `deno.json` AND `js/deltic/deno.json` must map that specifier to the
+// MODULE-IDENTITY CONSTRAINT: polyengine's wasi module imports
+// `@polyengine/runtime/embedder` by bare specifier internally; this leg's
+// `deno.json` AND `js/polyengine/deno.json` must map that specifier to the
 // IDENTICAL exact-pinned JSR version, or the embedder module loads twice
 // and the graph carries two runtime/translator plan-format pairings (the
 // host module's value recognition is brand-based and survives that).
 //
-// The translator comes from the packaged `@deltic/translator` JSR
+// The translator comes from the packaged `@polyengine/translator` JSR
 // prerelease (defaultTranslator()) by default — no fetch step, no
 // sha256 bookkeeping, no net grant; `--translator <path>` remains as an
 // optional override for a locally-built translator shim.
@@ -44,14 +44,14 @@
 // artifact has the provider plugged in-guest and would exercise no host
 // module at all.
 
-import { Translator } from "@deltic/runtime/shim";
-import type { ComponentArtifacts } from "@deltic/runtime/embedder";
-import { defaultTranslator } from "@deltic/translator";
-import { runSuite } from "@deltic/ct-runner";
-import { wasi } from "@deltic/wasi";
-import { configure, websocketImports } from "../../../js/deltic/websocket.ts";
+import { Translator } from "@polyengine/runtime/shim";
+import type { ComponentArtifacts } from "@polyengine/runtime/embedder";
+import { defaultTranslator } from "@polyengine/translator";
+import { runSuite } from "@polyengine/ct-runner";
+import { wasi } from "@polyengine/wasi";
+import { configure, websocketImports } from "../../../js/polyengine/websocket.ts";
 
-// This file sits at conformance/driver-ct/deltic/run.ts, so the repo
+// This file sits at conformance/driver-ct/polyengine/run.ts, so the repo
 // root is three levels up.
 const ROOT = new URL("../../../", import.meta.url);
 const ECHOD_BIN = new URL("target/debug/conformance-echod", ROOT).pathname;
@@ -83,8 +83,8 @@ interface Cli {
 function parseArgs(argv: string[]): Cli {
   const cli: Cli = {
     jspi: false,
-    out: new URL("conformance/driver-ct/results/deltic-deno.jsonl", ROOT).pathname,
-    target: "deltic-deno",
+    out: new URL("conformance/driver-ct/results/polyengine-deno.jsonl", ROOT).pathname,
+    target: "polyengine-deno",
   };
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
@@ -162,7 +162,7 @@ function unreachableUrl(): string {
 }
 
 /** The echod binary is a build artifact this driver does not produce
- *  itself (unlike deltic's own port, which is inside a checkout that
+ *  itself (unlike polyengine's own port, which is inside a checkout that
  *  owns the cargo build): `just conformance-ct::build-echod` owns it. */
 async function ensureEchod(): Promise<void> {
   try {
@@ -195,7 +195,7 @@ async function main() {
         `trusted, so the three websocket/tls/* cases will fail their ` +
         `connect. Re-run with DENO_CERT=${CA_PEM} (the Deno analogue of ` +
         `run-node.mjs's NODE_EXTRA_CA_CERTS; see the ` +
-        `conformance-ct::run-deltic justfile recipe).`,
+        `conformance-ct::run-polyengine justfile recipe).`,
     );
   }
 

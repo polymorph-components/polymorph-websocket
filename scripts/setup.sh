@@ -9,7 +9,7 @@
 #     bootstrap script)
 #   - pnpm (via npm, version pinned below)
 #   - JS dependencies for the package trees (skipped with SKIP_NODE=1);
-#     the JS package trees carry no compiled toolchain (deltic arrives as
+#     the JS package trees carry no compiled toolchain (polyengine arrives as
 #     pinned release assets, componentize-js as a verified binary), so
 #     installs run no cargo build
 #
@@ -131,7 +131,7 @@ if [ "${SKIP_NODE:-}" != "1" ]; then
     if ! have pnpm; then
         npm install -g "pnpm@${PNPM_VERSION}"
     fi
-    for dir in conformance/driver-ct/deltic js/componentize/wpt/parity; do
+    for dir in conformance/driver-ct/polyengine js/componentize/wpt/parity; do
         if [ -f "$REPO_ROOT/$dir/package.json" ]; then
             (cd "$REPO_ROOT/$dir" && pnpm install)
         fi
