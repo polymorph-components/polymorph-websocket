@@ -31,8 +31,8 @@ default-members = [
 # conformance/driver-ct/polyengine/package.json and `pnpm --dir
 # conformance/driver-ct/polyengine install` — the cargo pins gate, the
 # runner-js pin gate, and the CI ref guard fail on skew.
-component-test-sdk = { git = "https://github.com/polymorph-components/polymorph-test", rev = "38bfedf2b989522b82ddce5320fc1557a2f61461" }
-component-test-runner = { git = "https://github.com/polymorph-components/polymorph-test", rev = "38bfedf2b989522b82ddce5320fc1557a2f61461" }
+component-test-sdk = { git = "https://github.com/polymorph-components/polymorph-test", rev = "9f9e4d544b90e3321ac0572be92c57339b963d34" }
+component-test-runner = { git = "https://github.com/polymorph-components/polymorph-test", rev = "9f9e4d544b90e3321ac0572be92c57339b963d34" }
 anyhow = "1"
 bytes = "1"
 futures = "0.3"
