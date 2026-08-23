@@ -9,7 +9,7 @@
 // consumer's own conformance suite, executed by conformance/run.ts.
 
 import { assert, assertEquals, assertRejects, assertThrows } from "jsr:@std/assert@^1.0.0";
-import { ComponentException } from "@polyengine/runtime/embedder";
+import { ComponentException } from "@polyengine/protocol";
 import {
   currentConfig,
   resetConfig,

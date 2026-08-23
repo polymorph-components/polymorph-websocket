@@ -33,7 +33,7 @@ import {
   STREAM,
   type Stream,
   type StreamSource,
-} from "@polyengine/runtime/embedder";
+} from "@polyengine/protocol";
 
 // ----- WIT value types (contracts/embedder-api.md §"Value mapping") ---------
 

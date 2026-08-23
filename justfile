@@ -69,26 +69,40 @@ test:
 polyengine-module-check:
     cd js/polyengine && deno task check && deno task test
 
-# The one-version-everywhere gate: every `jsr:@polyengine/*` package
-# resolved in BOTH deno.locks (js/polyengine and
-# conformance/driver-ct/polyengine) must agree on the exact same
-# resolved version, or the embedder module can load twice across the
-# module boundary (see js/polyengine/deno.json's MODULE-IDENTITY
-# comment). js/polyengine's manifest takes a caret range (required for
-# publishing to JSR) so the *lock*, not the manifest, is the source of
-# truth for the resolved version. @polyengine/protocol is excluded: it
-# versions independently of the runtime/wasi/translator family it's a
-# transitive dependency of.
+# The A22 two-line pin gate: every `jsr:@polyengine/{runtime,translator,
+# wasi,ct-runner}` package resolved in either deno.lock (js/polyengine
+# and conformance/driver-ct/polyengine) must agree on ONE resolved
+# runtime-family version, and every `jsr:@polyengine/protocol` resolved
+# in either lock must agree on ONE resolved protocol version — the two
+# lines version independently (see js/polyengine/deno.json's and
+# conformance/driver-ct/polyengine/deno.json's A22 MODULE-IDENTITY
+# comments). js/polyengine's manifest no longer resolves the
+# runtime-family at all (A22: published host modules couple only to
+# @polyengine/protocol); the cheap guard below asserts that directly by
+# grepping js/polyengine for a stray @polyengine/runtime specifier.
 exam-polyengine:
     #!/usr/bin/env bash
     set -euo pipefail
-    v=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@polyengine/(?!protocol)")) | .value' \
+    rv=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@polyengine/(runtime|translator|wasi|ct-runner)")) | .value' \
         js/polyengine/deno.lock conformance/driver-ct/polyengine/deno.lock | sort -u)
-    if [ "$(printf '%s\n' "$v" | wc -l)" != 1 ]; then
-        echo "polyengine pin drift: $v" >&2
+    if [ "$(printf '%s\n' "$rv" | wc -l)" != 1 ]; then
+        echo "polyengine runtime-family pin drift: $rv" >&2
         exit 1
     fi
-    echo "polyengine pin: $v"
+    echo "polyengine runtime-family pin: $rv"
+    pv=$(jq -r '.specifiers // {} | to_entries[] | select(.key | test("^jsr:@polyengine/protocol")) | .value' \
+        js/polyengine/deno.lock conformance/driver-ct/polyengine/deno.lock | sort -u)
+    if [ "$(printf '%s\n' "$pv" | wc -l)" != 1 ]; then
+        echo "polyengine protocol pin drift: $pv" >&2
+        exit 1
+    fi
+    echo "polyengine protocol pin: $pv"
+    if jq -e '.imports // {} | keys[] | select(startswith("@polyengine/runtime"))' js/polyengine/deno.json >/dev/null 2>&1 \
+        || jq -e '.specifiers // {} | keys[] | select(test("^jsr:@polyengine/runtime"))' js/polyengine/deno.lock >/dev/null 2>&1; then
+        echo "js/polyengine (published host module) must not name @polyengine/runtime (A22)" >&2
+        exit 1
+    fi
+    echo "js/polyengine: no @polyengine/runtime specifier (ok)"
 
 # The JS runner core's one-version gate: the polyengine-browser driver's
 # npm tree (@jsr/polymorph__test, JSR's npm-compat form of

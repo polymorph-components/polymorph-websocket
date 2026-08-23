@@ -34,16 +34,18 @@ identically on Deno.
 
 ## Module identity
 
-`deno.json`'s `@polyengine/runtime/embedder` import maps to the exact same
-pinned URL as `conformance/driver-ct/polyengine/deno.json`. polyengine's
-`wasi-shims` module imports that specifier by bare name internally; if the
-two configs ever disagreed, the embedder module would load twice. This
-module recognizes polyengine values by `@polyengine/protocol` brand
-predicates (`isComponentException`, the `STREAM` brand), so recognition
-holds even in a multi-copy graph — but a duplicated embedder still splits
-the runtime/translator plan-format pairing, and stateful handles
-(streams/futures) minted by one copy are refused by the other. Keep both
-import maps byte-identical for that one entry.
+This package (`@polymorph/websocket`) depends on `@polyengine/protocol`
+only (A22: published host modules must not import
+`@polyengine/runtime`). It recognizes polyengine values by
+`@polyengine/protocol` brand predicates (`isComponentException`, the
+`STREAM` brand), not `instanceof`, so recognition holds even in a
+multi-copy graph — this package's own copy of `@polyengine/protocol` is
+harmless by construction and need not agree with any other config's.
+Applications that separately load the `@polyengine/runtime` embedder
+(e.g. `conformance/driver-ct/polyengine/deno.json`) still need ONE
+resolved runtime version across their own configs, since stateful
+handles (streams/futures) minted by one copy are refused by another —
+but that constraint is theirs, not this package's.
 
 ## Unit tests
 

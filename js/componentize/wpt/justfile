@@ -10,9 +10,9 @@
 #
 # The polyengine pin is single-site: the carrier bundle resolves @polyengine/*
 # through conformance/driver-ct/polyengine/deno.json (exact-pinned JSR
-# prereleases; see that deno.json's MODULE-IDENTITY comment) and its
-# translator asset is extracted from the packaged `@polyengine/translator`
-# JSR package's lock-pinned module cache (no fetch step).
+# releases) and its translator asset is extracted from the packaged
+# `@polyengine/translator` JSR package's lock-pinned module cache (no
+# fetch step).
 
 import '../../../justfile.shared.just'
 
