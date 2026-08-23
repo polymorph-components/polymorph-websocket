@@ -101,3 +101,67 @@ function handle(req: Request, sockets: Set<WebSocket>): Response | Promise<Respo
 
   return response;
 }
+
+/**
+ * A raw TCP stub that accepts a connection, drains whatever the client
+ * writes, and never answers — so a client's handshake stays pending until
+ * the client itself gives up. Unlike `/stall` above it is a bare
+ * `Deno.listen`, which is what lets a test observe the *socket* lifecycle:
+ * when the connection was accepted, and when the client's end went away.
+ */
+export interface StallStub {
+  base: string;
+  /** Resolves once a client connection has been accepted. */
+  accepted: Promise<void>;
+  /** Resolves once the accepted connection's read settles — the client closed. */
+  clientGone: Promise<void>;
+  close(): Promise<void>;
+}
+
+export function startStallStub(): StallStub {
+  const listener = Deno.listen({ hostname: "127.0.0.1", port: 0 });
+  const port = (listener.addr as Deno.NetAddr).port;
+  const conns: Deno.Conn[] = [];
+  const readers: Promise<void>[] = [];
+
+  let markAccepted!: () => void;
+  const accepted = new Promise<void>((r) => (markAccepted = r));
+  let markGone!: () => void;
+  const clientGone = new Promise<void>((r) => (markGone = r));
+
+  const serving = (async () => {
+    try {
+      for await (const conn of listener) {
+        conns.push(conn);
+        markAccepted();
+        readers.push((async () => {
+          const buf = new Uint8Array(1024);
+          try {
+            // Drain the upgrade request and answer nothing. The read settles
+            // only when the peer closes or resets.
+            while (await conn.read(buf) !== null) { /* keep draining */ }
+          } catch { /* a reset is the client going away too */ }
+          markGone();
+        })());
+      }
+    } catch { /* the listener was closed */ }
+  })();
+
+  return {
+    base: `ws://127.0.0.1:${port}`,
+    accepted,
+    clientGone,
+    async close() {
+      try {
+        listener.close();
+      } catch { /* already closed */ }
+      for (const c of conns) {
+        try {
+          c.close();
+        } catch { /* already closed */ }
+      }
+      await serving;
+      await Promise.all(readers);
+    },
+  };
+}

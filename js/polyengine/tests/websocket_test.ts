@@ -9,7 +9,7 @@
 // consumer's own conformance suite, executed by conformance/run.ts.
 
 import { assert, assertEquals, assertRejects, assertThrows } from "jsr:@std/assert@^1.0.0";
-import { ComponentException } from "@polyengine/protocol";
+import { ComponentException, isAbortable } from "@polyengine/protocol";
 import {
   currentConfig,
   resetConfig,
@@ -20,7 +20,12 @@ import {
   type WebsocketError,
   Websocket,
 } from "../websocket.ts";
-import { burstPayload, startEchoServer, type TestServer } from "./echo_server.ts";
+import {
+  burstPayload,
+  startEchoServer,
+  startStallStub,
+  type TestServer,
+} from "./echo_server.ts";
 
 /** Assert `fn` throws a branded `ComponentException` whose payload kind is `kind`. */
 function assertComponentKind(fn: () => unknown, kind: WebsocketError["kind"]): WebsocketError {
@@ -330,6 +335,68 @@ Deno.test("connect: the handshake bound fires as connect-failed", async () => {
     assert(elapsed < 5_000, `connect bound did not fire promptly (${elapsed}ms)`);
     assert("value" in payload && typeof payload.value === "string");
   });
+});
+
+/** Whether `p` settles (either way) within `ms`. */
+async function settlesWithin(p: Promise<unknown>, ms: number): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<boolean>((r) => {
+    timer = setTimeout(() => r(false), ms);
+  });
+  try {
+    return await Promise.race([p.then(() => true, () => true), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+Deno.test("connect: carries the A24 abortable mark", () => {
+  assert(isAbortable(Websocket.connect));
+});
+
+Deno.test("connect: an abort mid-handshake fails connect-failed and drops the socket", async () => {
+  resetConfig();
+  const stub = startStallStub();
+  try {
+    const controller = new AbortController();
+    const connecting = Websocket.connect(stub.base, [], controller.signal);
+    await stub.accepted;
+
+    const started = performance.now();
+    controller.abort();
+    const payload = await assertRejectsComponentKind(() => connecting, "connect-failed");
+    const elapsed = performance.now() - started;
+
+    // Far inside the module's own 30s connect bound: the abort settled it,
+    // not the timer.
+    assert(elapsed < 2_000, `abort did not settle connect promptly (${elapsed}ms)`);
+    assert("value" in payload && payload.value === "connect aborted");
+    assert(
+      await settlesWithin(stub.clientGone, 2_000),
+      "the platform socket was not reclaimed by the abort",
+    );
+  } finally {
+    await stub.close();
+    resetConfig();
+  }
+});
+
+Deno.test("connect: a pre-aborted signal fails before any socket is opened", async () => {
+  resetConfig();
+  const stub = startStallStub();
+  try {
+    const controller = new AbortController();
+    controller.abort();
+    const payload = await assertRejectsComponentKind(
+      () => Websocket.connect(stub.base, [], controller.signal),
+      "connect-failed",
+    );
+    assert("value" in payload && payload.value === "connect aborted");
+    assertEquals(await settlesWithin(stub.accepted, 250), false);
+  } finally {
+    await stub.close();
+    resetConfig();
+  }
 });
 
 async function drainBytes(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {

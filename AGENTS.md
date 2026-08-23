@@ -39,14 +39,14 @@ Layout (each directory's justfile module in parentheses):
   the module reads no ambient configuration. Since the A22
   protocol/runtime split, this published package (`@polymorph/websocket`)
   depends on `@polyengine/protocol` only (`js/polyengine/deno.json`,
-  caret-pinned `^0.2.2`) — no `@polyengine/runtime` import anywhere in
+  caret-pinned `^0.2.3`) — no `@polyengine/runtime` import anywhere in
   it; value recognition is brand-based (`@polyengine/protocol` predicates,
   not `instanceof`), so its copy of `@polyengine/protocol` is harmless
   even in a multi-copy graph. The runtime-linked application legs
   (`conformance/driver-ct/polyengine/`, the WPT parity round trip, the
   demo) separately exact-pin the `@polyengine/{runtime,translator,wasi,
-  ct-runner}` lockstep family (`0.5.0`) plus `@polyengine/protocol`
-  (`0.2.2`) in `conformance/driver-ct/polyengine/deno.json`; the root
+  ct-runner}` lockstep family (`0.5.1`) plus `@polyengine/protocol`
+  (`0.2.3`) in `conformance/driver-ct/polyengine/deno.json`; the root
   justfile's `exam-polyengine` recipe (CI-wired) asserts one resolved
   runtime-family version, one resolved protocol version, and that
   `js/polyengine` names no `@polyengine/runtime` specifier. Bump

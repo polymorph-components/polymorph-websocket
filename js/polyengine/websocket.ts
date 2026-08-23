@@ -27,6 +27,7 @@
 // as the reference does (websocket.js:57-63).
 
 import {
+  abortable,
   ComponentException,
   hasBrand,
   isComponentException,
@@ -337,10 +338,27 @@ export class Websocket {
    * `connect: static async func(url, protocols) -> result<websocket, error>`.
    * Resolves with a `Websocket` once the handshake completes; throws
    * `ComponentException<WebsocketError>` on failure. websocket.js:203.
+   *
+   * Marked abortable: an embedder appends an `AbortSignal` after the
+   * WIT-declared parameters, and aborts it only when a guest cancellation
+   * discards this call. An abort reclaims the platform socket at once — a
+   * pending handshake fails `connect-failed`, and a handshake that already
+   * completed has its socket closed instead of being left to the module's own
+   * connect bound. Direct callers may omit the signal.
    */
-  static async connect(url: string, protocols: string[]): Promise<Websocket> {
+  @abortable
+  static async connect(
+    url: string,
+    protocols: string[],
+    signal?: AbortSignal,
+  ): Promise<Websocket> {
     validateUrl(url);
     validateProtocols(protocols);
+
+    if (signal?.aborted) {
+      // Nothing to reclaim yet: refuse before the platform socket exists.
+      throw componentError({ kind: "connect-failed", value: "connect aborted" });
+    }
 
     let ws: WebSocket;
     try {
@@ -362,6 +380,7 @@ export class Websocket {
         ws.removeEventListener("open", onOpen);
         ws.removeEventListener("close", onClose);
         ws.removeEventListener("error", onError);
+        signal?.removeEventListener("abort", onAbort);
         fn(value);
       };
       const onOpen = () => settle(resolve as (v?: unknown) => void);
@@ -381,9 +400,21 @@ export class Websocket {
         // An `error` event is always followed by `close`; wait for it so
         // the reason (if any) rides along.
       };
+      const onAbort = () => {
+        settle(
+          reject,
+          componentError({ kind: "connect-failed", value: "connect aborted" }),
+        );
+        try {
+          ws.close();
+        } catch {
+          // Nothing to reclaim.
+        }
+      };
       ws.addEventListener("open", onOpen, { once: true });
       ws.addEventListener("close", onClose, { once: true });
       ws.addEventListener("error", onError, { once: true });
+      signal?.addEventListener("abort", onAbort, { once: true });
       timer = setTimeout(() => {
         settle(
           reject,
@@ -424,6 +455,20 @@ export class Websocket {
           JSON.stringify(ws.protocol)
         } although none was offered`,
       });
+    }
+
+    if (signal) {
+      // The abort is discard-only: it fires just when a guest cancellation
+      // discarded this call, so this connection can never reach the caller.
+      // Closing it unconditionally is therefore disposal of an undeliverable
+      // resource, never teardown of a connection someone still holds.
+      const disposeOnAbort = () => {
+        try {
+          ws.close();
+        } catch { /* already closing */ }
+      };
+      if (signal.aborted) disposeOnAbort();
+      else signal.addEventListener("abort", disposeOnAbort, { once: true });
     }
 
     return new Websocket(ws);
