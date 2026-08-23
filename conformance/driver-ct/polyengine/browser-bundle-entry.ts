@@ -10,8 +10,14 @@
 // browser/worker-entry.ts imports as `@polyengine/release-bundle-entry`
 // used to. Same export surface: instantiate/Translator/runSuite/
 // wasi/ComponentException/artifactsFromEnvelope and friends (49 exports
-// verified against the retired upstream entry).
+// verified against the retired upstream entry). A22 split the vocabulary
+// (ComponentException and friends) out of @polyengine/runtime/embedder
+// into @polyengine/protocol; both re-exports are combined here so the
+// bundle's consumers (the worker message loop, @polymorph/test's
+// polyengine-worker-main injection path) keep seeing the same names off
+// one namespace — no collisions, since the embedder no longer exports them.
 export * from "@polyengine/runtime/embedder";
+export * from "@polyengine/protocol";
 export { Translator } from "@polyengine/runtime/shim";
 export * from "@polyengine/ct-runner";
 export { wasi } from "@polyengine/wasi";

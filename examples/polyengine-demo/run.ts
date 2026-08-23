@@ -22,7 +22,8 @@
 
 import { Translator } from "@polyengine/runtime/shim";
 import type { ComponentArtifacts } from "@polyengine/runtime/embedder";
-import { instantiate, isComponentException } from "@polyengine/runtime/embedder";
+import { instantiate } from "@polyengine/runtime/embedder";
+import { isComponentException } from "@polyengine/protocol";
 import { defaultTranslator } from "@polyengine/translator";
 import { wasi } from "@polyengine/wasi";
 import { websocketImports } from "../../js/polyengine/websocket.ts";

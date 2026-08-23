@@ -1,11 +1,12 @@
 {
-  "//": "MODULE-IDENTITY CONSTRAINT: polyengine's wasi module imports @polyengine/runtime/embedder by bare specifier internally. The @polyengine/runtime/embedder entry here must resolve to the IDENTICAL @polyengine/runtime version as ../../../js/polyengine/deno.json's caret range (in both deno.locks), or the embedder module loads twice: value recognition survives that (websocket.ts recognizes polyengine values by @polyengine/protocol brand predicates, not instanceof), but a second copy splits the runtime/translator plan-format pairing, and stateful handles (streams/futures) minted by one copy are refused by the other. Pin story: exact-pinned JSR releases (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor; per-commit `<next>-pre.g<hash>` prereleases exist between releases — pin exactly); @polyengine/translator ships the translator wasm for that SAME commit; deno.lock carries integrity, --frozen enforced everywhere; one version repo-wide is asserted by the pin gate (justfile: exam-polyengine).",
+  "//": "A22 MODULE-IDENTITY POSTURE: @polyengine/wasi@0.5.0 is protocol-only internally (the old module-identity clause tying it to @polyengine/runtime/embedder is gone), so this file's runtime-family pins only need to be exact and mutually consistent with each other and with ../../../js/polyengine/deno.json when that package's caret range resolves the same commit — this repo's driver code (run.ts, examples/polyengine-demo/run.ts) that also loads @polyengine/protocol vocabulary must still resolve to ONE @polyengine/runtime version if it loads the embedder in more than one config, since stateful handles (streams/futures) minted by one copy are refused by another; the published @polymorph/websocket host module, by contrast, now couples only to @polyengine/protocol, whose copies are harmless by construction. Pin story: exact-pinned JSR releases (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor; per-commit `<next>-pre.g<hash>` prereleases exist between releases — pin exactly); @polyengine/translator ships the translator wasm for that SAME commit; deno.lock carries integrity, --frozen enforced everywhere; the pin gate (justfile: exam-polyengine) asserts one resolved @polyengine/runtime version and one resolved @polyengine/protocol version repo-wide.",
   "imports": {
-    "@polyengine/ct-runner": "jsr:@polyengine/ct-runner@0.4.0",
-    "@polyengine/runtime/embedder": "jsr:@polyengine/runtime@0.4.0/embedder",
-    "@polyengine/runtime/shim": "jsr:@polyengine/runtime@0.4.0/shim",
-    "@polyengine/wasi": "jsr:@polyengine/wasi@0.4.0",
-    "@polyengine/translator": "jsr:@polyengine/translator@0.4.0",
+    "@polyengine/ct-runner": "jsr:@polyengine/ct-runner@0.5.0",
+    "@polyengine/runtime/embedder": "jsr:@polyengine/runtime@0.5.0/embedder",
+    "@polyengine/runtime/shim": "jsr:@polyengine/runtime@0.5.0/shim",
+    "@polyengine/wasi": "jsr:@polyengine/wasi@0.5.0",
+    "@polyengine/translator": "jsr:@polyengine/translator@0.5.0",
+    "@polyengine/protocol": "jsr:@polyengine/protocol@0.2.2",
     "@polymorph/test/polyengine-worker-main": "jsr:@polymorph/test@0.2.1/polyengine-worker-main"
   },
   "minimumDependencyAge": { "age": "P1D", "exclude": ["jsr:@polyengine/*", "jsr:@polymorph/*"] },
