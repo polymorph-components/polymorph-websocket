@@ -3,7 +3,7 @@
 `websocket.ts` is **the** JS host for `polymorph:websocket`: the standard
 `WebSocket` API only, no `node:` modules, no runtime dependencies, and it
 carries every JS-host row of the conformance matrix (Deno and headless
-Chromium). It began as the [deltic](https://github.com/lann/deltic)-native
+Chromium). It began as the [deltic](https://github.com/polymorph-components/polyengine)-native
 port of the browser-first reference host `js/jco/websocket.js` (retired
 with the jco legs at commit c9252be; see git history), rewritten over
 deltic's embedder API (typed `Stream<T>` / `ReadableStream` rather than
@@ -11,7 +11,7 @@ bare-payload `Stream`, and `ComponentException` throws rather than
 `throw { tag, val }`) — deltic has since been renamed
 [polyengine](https://github.com/polymorph-components/polyengine). It was
 developed as deltic's own `ports/websocket` reference-host port and was
-upstreamed here per [lann/deltic#14](https://github.com/lann/deltic/issues/14)
+upstreamed here per [lann/deltic#14](https://github.com/polymorph-components/polyengine/issues/14)
 (historical: predates the rename); the WIT contract is
 [`wit/websocket.wit`](../../wit/websocket.wit), and every doc comment
 quoting a contract quotes that file.
