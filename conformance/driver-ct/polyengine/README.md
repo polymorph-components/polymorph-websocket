@@ -22,13 +22,13 @@ module graph — no fetch step, no net grant.
 ## The pin
 
 polyengine publishes `@polyengine/{runtime,translator,wasi,ct-runner}` to
-JSR as a lockstep-versioned line (this directory exact-pins `0.5.0`) and
+JSR as a lockstep-versioned line (this directory exact-pins `0.6.3`) and
 `@polyengine/protocol` (the host-ABI vocabulary package) as an
-independently-versioned line (exact-pinned `0.2.2` here). It is pinned in
+independently-versioned line (exact-pinned `0.3.1` here). It is pinned in
 this directory's `deno.json` import map
-(`jsr:@polyengine/<pkg>@0.5.0` for `@polyengine/ct-runner`,
+(`jsr:@polyengine/<pkg>@0.6.3` for `@polyengine/ct-runner`,
 `@polyengine/runtime/embedder`, `@polyengine/runtime/shim`,
-`@polyengine/wasi`, `@polyengine/translator`; `jsr:@polyengine/protocol@0.2.2`
+`@polyengine/wasi`, `@polyengine/translator`; `jsr:@polyengine/protocol@0.3.1`
 for vocabulary consumed by driver code such as `examples/polyengine-demo/run.ts`).
 `deno.lock` carries integrity hashes for that module graph, enforced with
 `--frozen`.

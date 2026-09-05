@@ -218,7 +218,7 @@ async function main() {
 
   const artifacts = await loadArtifacts(cli.translator);
   const imports = {
-    ...wasi({ cli: { env, passthrough: false } }),
+    ...wasi({ cli: { env } }),
     ...websocketImports(),
   };
 
