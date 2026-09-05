@@ -1,54 +1,54 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@polyengine/ct-runner@0.5.1": "0.5.1",
-    "jsr:@polyengine/protocol@0.2.3": "0.2.3",
-    "jsr:@polyengine/protocol@~0.2.3": "0.2.3",
-    "jsr:@polyengine/runtime@0.5.1": "0.5.1",
-    "jsr:@polyengine/runtime@~0.5.1": "0.5.1",
-    "jsr:@polyengine/translator@0.5.1": "0.5.1",
-    "jsr:@polyengine/wasi@0.5.1": "0.5.1",
-    "jsr:@polymorph/test@0.2.1": "0.2.1",
-    "npm:@jsr/polymorph__test@0.2.1": "0.2.1",
+    "jsr:@polyengine/ct-runner@0.6.3": "0.6.3",
+    "jsr:@polyengine/protocol@0.3.1": "0.3.1",
+    "jsr:@polyengine/protocol@~0.3.1": "0.3.1",
+    "jsr:@polyengine/runtime@0.6.3": "0.6.3",
+    "jsr:@polyengine/runtime@~0.6.3": "0.6.3",
+    "jsr:@polyengine/translator@0.6.3": "0.6.3",
+    "jsr:@polyengine/wasi@0.6.3": "0.6.3",
+    "jsr:@polymorph/test@0.3.0": "0.3.0",
+    "npm:@jsr/polymorph__test@0.3.0": "0.3.0",
     "npm:playwright-core@^1.61.1": "1.62.1"
   },
   "jsr": {
-    "@polyengine/ct-runner@0.5.1": {
-      "integrity": "97746f0ea1750690f30bf3f1e0cb5a1e0d06be9720c983f2084999c6c6e97d89",
+    "@polyengine/ct-runner@0.6.3": {
+      "integrity": "61821fbc7d8de1aab0a82a6ab3adfa89cc63b87c1a4573516e45a407d501027c",
       "dependencies": [
-        "jsr:@polyengine/protocol@~0.2.3",
-        "jsr:@polyengine/runtime@~0.5.1"
+        "jsr:@polyengine/protocol@~0.3.1",
+        "jsr:@polyengine/runtime@~0.6.3"
       ]
     },
-    "@polyengine/protocol@0.2.3": {
-      "integrity": "e3f0ac4165eb691d7231164ce28cf75e275c99496aa538e032297febdc52b371"
+    "@polyengine/protocol@0.3.1": {
+      "integrity": "3cba0ded857c5cc911fcf9c0782c7566c79af89ddc8e0ec4e48ece60c807a518"
     },
-    "@polyengine/runtime@0.5.1": {
-      "integrity": "6337c94d623bc2013fdeb324a5206860a916b8897b39cf4bec65b1bf87c287d0",
+    "@polyengine/runtime@0.6.3": {
+      "integrity": "8f1ffc1c547793bc4cb3c1dec6a62c8cf0eb5cdb135b70e6df1fd042c6ec58f0",
       "dependencies": [
-        "jsr:@polyengine/protocol@~0.2.3"
+        "jsr:@polyengine/protocol@~0.3.1"
       ]
     },
-    "@polyengine/translator@0.5.1": {
-      "integrity": "16d7ac88997f89f10145cc109737b749bfebd37c9ea1aefe0a41b44c01b75586",
+    "@polyengine/translator@0.6.3": {
+      "integrity": "ccd0bb64ce3081d70b13e224c77e423faf7acf9953f62d4e0d2bab97c626c932",
       "dependencies": [
-        "jsr:@polyengine/runtime@~0.5.1"
+        "jsr:@polyengine/runtime@~0.6.3"
       ]
     },
-    "@polyengine/wasi@0.5.1": {
-      "integrity": "1cb71ff91c24415d85a3b15bbb35462757586fa1478febba605cab4c1b2dbe72",
+    "@polyengine/wasi@0.6.3": {
+      "integrity": "5c738fe95101f22e469346618e79ce261dd636a5d44e89fdcdd40c33d8c92e17",
       "dependencies": [
-        "jsr:@polyengine/protocol@~0.2.3"
+        "jsr:@polyengine/protocol@~0.3.1"
       ]
     },
-    "@polymorph/test@0.2.1": {
-      "integrity": "1934b15f69d2c5f733cb42176aee8899f6da507a30ba1e25fad942fb82c0546e"
+    "@polymorph/test@0.3.0": {
+      "integrity": "dab82b57524c9ad375d3cc75db1f083c198a24d40105d3f1734f719b3db3f70a"
     }
   },
   "npm": {
-    "@jsr/polymorph__test@0.2.1": {
-      "integrity": "sha512-5bkpwmjHp8Hjk69ADkQp1oo4CHyiPT2BAtQWbi7QrbTkrrwIDOn73JzsmZhzWT4mvzkWEL3Q4u1BSOra3sVBLQ==",
-      "tarball": "https://npm.jsr.io/~/11/@jsr/polymorph__test/0.2.1.tgz"
+    "@jsr/polymorph__test@0.3.0": {
+      "integrity": "sha512-NlpHmd5fA3KB/aAaXrBW4KX57UXkl/V9+RLa+fchFUsjASsigthEHMEiiNozRYN/l3xgsKMSC7J3IPp9VtECsQ==",
+      "tarball": "https://npm.jsr.io/~/11/@jsr/polymorph__test/0.3.0.tgz"
     },
     "playwright-core@1.62.1": {
       "integrity": "sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==",
@@ -57,16 +57,16 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@polyengine/ct-runner@0.5.1",
-      "jsr:@polyengine/protocol@0.2.3",
-      "jsr:@polyengine/runtime@0.5.1",
-      "jsr:@polyengine/translator@0.5.1",
-      "jsr:@polyengine/wasi@0.5.1",
-      "jsr:@polymorph/test@0.2.1"
+      "jsr:@polyengine/ct-runner@0.6.3",
+      "jsr:@polyengine/protocol@0.3.1",
+      "jsr:@polyengine/runtime@0.6.3",
+      "jsr:@polyengine/translator@0.6.3",
+      "jsr:@polyengine/wasi@0.6.3",
+      "jsr:@polymorph/test@0.3.0"
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@jsr/polymorph__test@0.2.1",
+        "npm:@jsr/polymorph__test@0.3.0",
         "npm:playwright-core@^1.61.1"
       ]
     }

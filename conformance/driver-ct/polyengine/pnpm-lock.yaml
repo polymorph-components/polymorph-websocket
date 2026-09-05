@@ -9,16 +9,16 @@ importers:
   .:
     dependencies:
       '@jsr/polymorph__test':
-        specifier: 0.2.1
-        version: 0.2.1
+        specifier: 0.3.0
+        version: 0.3.0
       playwright-core:
         specifier: ^1.61.1
         version: 1.62.1
 
 packages:
 
-  '@jsr/polymorph__test@0.2.1':
-    resolution: {integrity: sha512-5bkpwmjHp8Hjk69ADkQp1oo4CHyiPT2BAtQWbi7QrbTkrrwIDOn73JzsmZhzWT4mvzkWEL3Q4u1BSOra3sVBLQ==, tarball: https://npm.jsr.io/~/11/@jsr/polymorph__test/0.2.1.tgz}
+  '@jsr/polymorph__test@0.3.0':
+    resolution: {integrity: sha512-NlpHmd5fA3KB/aAaXrBW4KX57UXkl/V9+RLa+fchFUsjASsigthEHMEiiNozRYN/l3xgsKMSC7J3IPp9VtECsQ==, tarball: https://npm.jsr.io/~/11/@jsr/polymorph__test/0.3.0.tgz}
 
   playwright-core@1.62.1:
     resolution: {integrity: sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==}
@@ -27,6 +27,6 @@ packages:
 
 snapshots:
 
-  '@jsr/polymorph__test@0.2.1': {}
+  '@jsr/polymorph__test@0.3.0': {}
 
   playwright-core@1.62.1: {}
