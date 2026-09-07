@@ -216,6 +216,10 @@ fn run() -> Result<ExitCode> {
                 conformance_echod::TEST_CA_PEM,
             )
             .inherit_network()
+            // wasmtime-wasi 48 defaults AllowedNetworkUses to all-off
+            // (inherit_network only lifts the address check); the
+            // in-guest provider dials TCP through wasi:sockets.
+            .allow_tcp(true)
             .allow_ip_name_lookup(true);
         }
         Data {
