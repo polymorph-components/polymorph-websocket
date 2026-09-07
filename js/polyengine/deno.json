@@ -1,6 +1,6 @@
 {
   "name": "@polymorph/websocket",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "license": "Apache-2.0",
   "exports": "./websocket.ts",
   "//": "A22 MODULE-IDENTITY POSTURE: this package couples only to @polyengine/protocol (the host-ABI vocabulary package) — no @polyengine/runtime import anywhere in this module, per polyengine's A22 rule that published host modules must not import @polyengine/runtime. websocket.ts recognizes polyengine values by @polyengine/protocol brand predicates, not instanceof, so its copies are harmless by construction: any application that also loads the embedder resolves its own runtime version independently, and this package neither constrains nor is constrained by that choice. Pin story: this published package takes a caret range on @polyengine/protocol (caret-honest upstream: within a minor line releases stay compatible, breaking bumps the minor); deno.lock carries integrity, --frozen enforced everywhere; the pin gate (justfile: exam-polyengine) asserts this file names no @polyengine/runtime specifier.",
